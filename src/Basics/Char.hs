@@ -15,6 +15,7 @@ module Basics.Char
   , write#
   , index#
   , set#
+  , shrink#
     -- Constants
   , def
     -- Metadata
@@ -24,6 +25,7 @@ module Basics.Char
 import GHC.Exts hiding (setByteArray#)
 
 import qualified Foreign.Storable as FS
+import qualified GHC.Exts as Exts
 
 type T = Char
 type T# = Char#
@@ -55,5 +57,6 @@ set# marr off len x s = case len of
   0# -> s
   _ -> set# marr (off +# 1# ) (len -# 1# ) x (write# marr off x s)
 
-
+shrink# :: MutableByteArray# s -> Int# -> State# s -> State# s
+shrink# m i = Exts.shrinkMutableByteArray# m (i *# 4#)
 

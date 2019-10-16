@@ -26,6 +26,7 @@ module Basics.Int8
   , initialized#
   , copy#
   , copyMutable#
+  , shrink#
     -- Constants
   , zero
   , def
@@ -89,6 +90,9 @@ write# = writeInt8Array#
 
 set# :: MutableByteArray# s -> Int# -> Int# -> T# -> State# s -> State# s
 set# marr off len x s = Exts.setByteArray# marr off len x s
+
+shrink# :: MutableByteArray# s -> Int# -> State# s -> State# s
+shrink# = Exts.shrinkMutableByteArray#
 
 uninitialized# :: Int# -> State# s -> (# State# s, MutableByteArray# s #)
 uninitialized# = Exts.newByteArray#

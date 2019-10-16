@@ -26,6 +26,7 @@ module Basics.Bool
   , initialized#
   , copy#
   , copyMutable#
+  , shrink#
     -- Constants
   , def
     -- Metadata
@@ -68,6 +69,9 @@ write# = Exts.writeInt8Array#
 
 set# :: MutableByteArray# s -> Int# -> Int# -> T# -> State# s -> State# s
 set# = Exts.setByteArray#
+
+shrink# :: MutableByteArray# s -> Int# -> State# s -> State# s
+shrink# = Exts.shrinkMutableByteArray#
 
 uninitialized# :: Int# -> State# s -> (# State# s, MutableByteArray# s #)
 uninitialized# = Exts.newByteArray#

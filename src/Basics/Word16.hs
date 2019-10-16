@@ -34,6 +34,7 @@ module Basics.Word16
   , copy#
   , copyMutable#
   , set#
+  , shrink#
     -- Constants
   , def
   , zero
@@ -139,3 +140,7 @@ copy# dst doff src soff len =
 copyMutable# :: MutableByteArray# s -> Int# -> MutableByteArray# s -> Int# -> Int# -> State# s -> State# s
 copyMutable# dst doff src soff len =
   Exts.copyMutableByteArray# src (soff *# 2#) dst (doff *# 2#) (len *# 2#)
+
+shrink# :: MutableByteArray# s -> Int# -> State# s -> State# s
+shrink# m i = Exts.shrinkMutableByteArray# m (i *# 2#)
+

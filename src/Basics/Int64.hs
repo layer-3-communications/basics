@@ -34,6 +34,7 @@ module Basics.Int64
   , copy#
   , copyMutable#
   , set#
+  , shrink#
     -- Constants
   , zero
   , def
@@ -127,6 +128,9 @@ initialized# ::
 initialized# n e s0 = case uninitialized# n s0 of
   (# s1, a #) -> case set# a 0# n e s1 of
     s2 -> (# s2, a #)
+
+shrink# :: MutableByteArray# s -> Int# -> State# s -> State# s
+shrink# m i = Exts.shrinkMutableByteArray# m (i *# 8#)
 
 copy# :: MutableByteArray# s -> Int# -> ByteArray# -> Int# -> Int# -> State# s -> State# s
 copy# dst doff src soff len =

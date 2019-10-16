@@ -34,6 +34,7 @@ module Basics.Int
   , initialized#
   , copy#
   , copyMutable#
+  , shrink#
     -- Constants
   , zero
   , def
@@ -148,3 +149,8 @@ copyMutable# dst doff src soff len = Exts.copyMutableByteArray#
   dst
   (doff *# (case size of I# i -> i))
   (len *# (case size of I# i -> i))
+
+shrink# :: MutableByteArray# s -> Int# -> State# s -> State# s
+shrink# m i = Exts.shrinkMutableByteArray# m
+  (i *# (case size of I# sz -> sz))
+
