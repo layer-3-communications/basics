@@ -57,6 +57,6 @@ set# marr off len x s = case len of
   0# -> s
   _ -> set# marr (off +# 1# ) (len -# 1# ) x (write# marr off x s)
 
-shrink# :: MutableByteArray# s -> Int# -> State# s -> State# s
-shrink# m i = Exts.shrinkMutableByteArray# m (i *# 4#)
+shrink# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, MutableByteArray# s #)
+shrink# m i s0 = (# Exts.shrinkMutableByteArray# m (i *# 4#) s0, m #)
 

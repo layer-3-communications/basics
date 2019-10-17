@@ -41,11 +41,16 @@ module Basics.Word16
     -- Metadata
   , signed
   , size
+    -- Encoding
+  , shows
   ) where
+
+import Prelude hiding (shows)
 
 import GHC.Exts hiding (setByteArray#)
 import GHC.Word
 
+import qualified Prelude
 import qualified GHC.Exts as Exts
 
 type T = Word16
@@ -141,6 +146,8 @@ copyMutable# :: MutableByteArray# s -> Int# -> MutableByteArray# s -> Int# -> In
 copyMutable# dst doff src soff len =
   Exts.copyMutableByteArray# src (soff *# 2#) dst (doff *# 2#) (len *# 2#)
 
-shrink# :: MutableByteArray# s -> Int# -> State# s -> State# s
-shrink# m i = Exts.shrinkMutableByteArray# m (i *# 2#)
+shrink# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, MutableByteArray# s #)
+shrink# m i s = (# Exts.shrinkMutableByteArray# m (i *# 2# ) s, m #)
 
+shows :: T -> String -> String
+shows = Prelude.shows

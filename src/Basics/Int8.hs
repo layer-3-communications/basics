@@ -33,10 +33,16 @@ module Basics.Int8
     -- Metadata
   , signed
   , size
+    -- Encoding
+  , shows
   ) where
+
+import Prelude hiding (shows)
 
 import GHC.Exts hiding (setByteArray#)
 import GHC.Int
+
+import qualified Prelude
 import qualified GHC.Exts as Exts
 
 type T = Int8
@@ -91,8 +97,8 @@ write# = writeInt8Array#
 set# :: MutableByteArray# s -> Int# -> Int# -> T# -> State# s -> State# s
 set# marr off len x s = Exts.setByteArray# marr off len x s
 
-shrink# :: MutableByteArray# s -> Int# -> State# s -> State# s
-shrink# = Exts.shrinkMutableByteArray#
+shrink# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, MutableByteArray# s #)
+shrink# m i s = (# Exts.shrinkMutableByteArray# m i s, m #)
 
 uninitialized# :: Int# -> State# s -> (# State# s, MutableByteArray# s #)
 uninitialized# = Exts.newByteArray#
@@ -109,3 +115,6 @@ initialized# :: Int# -> T# -> State# s -> (# State# s, MutableByteArray# s #)
 initialized# n e s0 = case Exts.newByteArray# n s0 of
   (# s1, a #) -> case set# a 0# n e s1 of
     s2 -> (# s2, a #)
+
+shows :: T -> String -> String
+shows = Prelude.shows

@@ -41,11 +41,17 @@ module Basics.Int
     -- Metadata
   , signed
   , size
+    -- Encoding
+  , shows
   ) where
+
+import Prelude hiding (shows)
 
 import GHC.Exts (Int(I#),RuntimeRep(IntRep))
 import GHC.Exts (State#,MutableByteArray#,Int#,ByteArray#)
 import GHC.Exts ((+#),(*#),(-#))
+
+import qualified Prelude
 import qualified GHC.Exts as Exts
 import qualified Foreign.Storable as FS
 
@@ -150,7 +156,8 @@ copyMutable# dst doff src soff len = Exts.copyMutableByteArray#
   (doff *# (case size of I# i -> i))
   (len *# (case size of I# i -> i))
 
-shrink# :: MutableByteArray# s -> Int# -> State# s -> State# s
-shrink# m i = Exts.shrinkMutableByteArray# m
-  (i *# (case size of I# sz -> sz))
+shrink# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, MutableByteArray# s #)
+shrink# m i s0 = (# Exts.shrinkMutableByteArray# m (i *# (case size of I# sz -> sz)) s0, m #)
 
+shows :: T -> String -> String
+shows = Prelude.shows

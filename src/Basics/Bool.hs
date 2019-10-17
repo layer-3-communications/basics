@@ -31,10 +31,16 @@ module Basics.Bool
   , def
     -- Metadata
   , size
+    -- Encoding
+  , shows
   ) where
+
+import Prelude hiding (shows)
 
 import GHC.Exts (RuntimeRep(IntRep))
 import GHC.Exts (Int#,State#,MutableByteArray#,ByteArray#)
+
+import qualified Prelude
 import qualified GHC.Exts as Exts
 
 type T = Bool
@@ -70,8 +76,8 @@ write# = Exts.writeInt8Array#
 set# :: MutableByteArray# s -> Int# -> Int# -> T# -> State# s -> State# s
 set# = Exts.setByteArray#
 
-shrink# :: MutableByteArray# s -> Int# -> State# s -> State# s
-shrink# = Exts.shrinkMutableByteArray#
+shrink# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, MutableByteArray# s #)
+shrink# m i s = (# Exts.shrinkMutableByteArray# m i s, m #)
 
 uninitialized# :: Int# -> State# s -> (# State# s, MutableByteArray# s #)
 uninitialized# = Exts.newByteArray#
@@ -88,3 +94,6 @@ copy# dst doff src soff len =
 copyMutable# :: MutableByteArray# s -> Int# -> MutableByteArray# s -> Int# -> Int# -> State# s -> State# s
 copyMutable# dst doff src soff len =
   Exts.copyMutableByteArray# src soff dst doff len
+
+shows :: T -> String -> String
+shows = Prelude.shows

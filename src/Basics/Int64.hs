@@ -40,11 +40,16 @@ module Basics.Int64
   , def
     -- Metadata
   , signed
+    -- Encoding
+  , shows
   ) where
+
+import Prelude hiding (shows)
 
 import GHC.Exts
 import GHC.Int
 
+import qualified Prelude
 import qualified GHC.Exts as Exts
 
 type T = Int64
@@ -129,8 +134,8 @@ initialized# n e s0 = case uninitialized# n s0 of
   (# s1, a #) -> case set# a 0# n e s1 of
     s2 -> (# s2, a #)
 
-shrink# :: MutableByteArray# s -> Int# -> State# s -> State# s
-shrink# m i = Exts.shrinkMutableByteArray# m (i *# 8#)
+shrink# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, MutableByteArray# s #)
+shrink# m i s0 = (# Exts.shrinkMutableByteArray# m (i *# 8#) s0, m #)
 
 copy# :: MutableByteArray# s -> Int# -> ByteArray# -> Int# -> Int# -> State# s -> State# s
 copy# dst doff src soff len =
@@ -139,3 +144,6 @@ copy# dst doff src soff len =
 copyMutable# :: MutableByteArray# s -> Int# -> MutableByteArray# s -> Int# -> Int# -> State# s -> State# s
 copyMutable# dst doff src soff len =
   Exts.copyMutableByteArray# src (soff *# 8#) dst (doff *# 8#) (len *# 8#)
+
+shows :: T -> String -> String
+shows = Prelude.shows

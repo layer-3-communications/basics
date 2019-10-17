@@ -29,12 +29,14 @@ module Basics.Word
   , readByteArray#
   , writeByteArray#
   , indexByteArray#
+  , shrink#
     -- Metadata
   , signed
   , size
   ) where
 
 import GHC.Exts
+import qualified GHC.Exts as Exts
 import qualified Foreign.Storable as FS
 
 type T = Word
@@ -101,3 +103,5 @@ readByteArray# = readWordArray#
 writeByteArray# :: MutableByteArray# s -> Int# -> T# -> State# s -> State# s
 writeByteArray# = writeWordArray#
 
+shrink# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, MutableByteArray# s #)
+shrink# m i s0 = (# Exts.shrinkMutableByteArray# m (i *# (case size of I# sz -> sz)) s0, m #)

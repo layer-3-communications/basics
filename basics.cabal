@@ -15,12 +15,14 @@ extra-source-files: CHANGELOG.md
 
 library
   exposed-modules:
+    Basics.ArrayArray
     Basics.Bool
     Basics.ByteArray
     Basics.Char
     Basics.Int
     Basics.Int8
     Basics.Int64
+    Basics.ShortText
     Basics.Word
     Basics.Word8
     Basics.Word16
@@ -30,6 +32,10 @@ library
   build-depends:
     , base >=4.12.0.0 && <5
     , primitive >=0.7 && <0.8
+    , primitive-unlifted >=0.1.2 && <0.2
+    , text-short >=0.1.3 && <0.2
+    , bytestring >=0.10.8 && <0.11
+    , bifunctors >=5.5.5 && <5.6
     , wide-word
   hs-source-dirs: src
   ghc-options: -Wall -O2
