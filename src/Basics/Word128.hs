@@ -12,6 +12,7 @@ module Basics.Word128
   , unlift
     -- Compare
   , eq#
+  , neq#
     -- Array
   , read#
   , write#
@@ -57,6 +58,9 @@ unlift (Word128 (W64# a) (W64# b)) = (# a, b #)
 
 eq# :: T# -> T# -> Int#
 eq# (# x1, y1 #) (# x2, y2 #) = ((eqWord# x1 x2) `andI#` (eqWord# y1 y2))
+
+neq# :: T# -> T# -> Int#
+neq# (# x1, y1 #) (# x2, y2 #) = ((neWord# x1 x2) `orI#` (neWord# y1 y2))
 
 index# :: ByteArray# -> Int# -> T#
 index# arr# i# =
