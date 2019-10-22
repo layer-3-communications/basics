@@ -22,6 +22,7 @@ module Basics.ShortText
   , set#
   , shrink#
   , eq#
+  , neq#
     -- Encode
   , shows
   ) where
@@ -89,6 +90,14 @@ eq# :: ByteArray# -> ByteArray# -> Int#
 eq# a b = case lenA ==# lenB of
   1# -> Exts.compareByteArrays# a 0# b 0# lenA ==# 0#
   _ -> 0#
+  where
+  !lenA = Exts.sizeofByteArray# a
+  !lenB = Exts.sizeofByteArray# b
+
+neq# :: ByteArray# -> ByteArray# -> Int#
+neq# a b = case lenA ==# lenB of
+  1# -> Exts.compareByteArrays# a 0# b 0# lenA /=# 0#
+  _ -> 1#
   where
   !lenA = Exts.sizeofByteArray# a
   !lenB = Exts.sizeofByteArray# b

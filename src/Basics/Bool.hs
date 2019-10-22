@@ -17,6 +17,7 @@ module Basics.Bool
   , unlift
     -- Compare
   , eq#
+  , neq#
     -- Array
   , read#
   , write#
@@ -63,6 +64,9 @@ unlift = \case
 
 eq# :: Int# -> Int# -> Int#
 eq# = (Exts.==#)
+
+neq# :: Int# -> Int# -> Int#
+neq# = (Exts./=#)
 
 index# :: ByteArray# -> Int# -> T#
 index# = Exts.indexInt8Array#
