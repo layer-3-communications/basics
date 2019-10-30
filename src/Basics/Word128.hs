@@ -13,6 +13,8 @@ module Basics.Word128
     -- Compare
   , eq#
   , neq#
+  , lt#
+  , gt#
     -- Array
   , read#
   , write#
@@ -49,6 +51,20 @@ def = 0
 
 size :: Int
 size = 16
+
+lt# :: T# -> T# -> Int#
+lt# (# a1, a2 #) (# b1, b2 #) = case ltWord# a1 b1 of
+  1# -> 1#
+  _ -> case eqWord# a1 b1 of
+    1# -> ltWord# a2 b2
+    _ -> 0#
+
+gt# :: T# -> T# -> Int#
+gt# (# a1, a2 #) (# b1, b2 #) = case gtWord# a1 b1 of
+  1# -> 1#
+  _ -> case eqWord# a1 b1 of
+    1# -> gtWord# a2 b2
+    _ -> 0#
 
 lift :: T# -> T
 lift (# a, b #) = Word128 (W64# a) (W64# b)
