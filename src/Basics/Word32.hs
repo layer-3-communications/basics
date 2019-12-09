@@ -17,6 +17,9 @@ module Basics.Word32
   , lte#
   , eq#
   , neq#
+    -- Arithmetic
+  , quot#
+  , rem#
     -- Array
   , read#
   , write#
@@ -84,6 +87,12 @@ eq# = eqWord#
 
 neq# :: T# -> T# -> Int#
 neq# = neWord#
+
+quot# :: T# -> T# -> T#
+quot# = quotWord#
+
+rem# :: T# -> T# -> T#
+rem# = remWord#
 
 index# :: ByteArray# -> Int# -> T#
 index# = indexWord32Array#

@@ -15,6 +15,8 @@ module Basics.Word128
   , neq#
   , lt#
   , gt#
+    -- Arithmetic
+  , quot#
     -- Array
   , read#
   , write#
@@ -65,6 +67,11 @@ gt# (# a1, a2 #) (# b1, b2 #) = case gtWord# a1 b1 of
   _ -> case eqWord# a1 b1 of
     1# -> gtWord# a2 b2
     _ -> 0#
+
+quot# :: T# -> T# -> T#
+quot# (# a1, a2 #) (# b1, b2 #) =
+  case quot (Word128 (W64# a1) (W64# a2)) (Word128 (W64# b1) (W64# b2)) of
+    Word128 (W64# c1) (W64# c2) -> (# c1, c2 #)
 
 lift :: T# -> T
 lift (# a, b #) = Word128 (W64# a) (W64# b)
