@@ -10,6 +10,9 @@ module Basics.Word8
     -- Lifting
   , lift
   , unlift
+    -- Arithmetic
+  , quot#
+  , rem#
     -- Compare
   , gt#
   , lt#
@@ -84,6 +87,12 @@ eq# = eqWord#
 
 neq# :: T# -> T# -> Int#
 neq# = neWord#
+
+quot# :: T# -> T# -> T#
+quot# = quotWord#
+
+rem# :: T# -> T# -> T#
+rem# = remWord#
 
 index# :: ByteArray# -> Int# -> T#
 index# = indexWord8Array#
