@@ -94,7 +94,7 @@ plus# :: T# -> T# -> T#
 plus# = plusWord#
 
 minus# :: T# -> T# -> T#
-minus# = minusWord#
+minus# x y = narrow16Word# (minusWord# x y)
 
 gt# :: T# -> T# -> Int#
 gt# = gtWord#

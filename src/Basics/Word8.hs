@@ -11,6 +11,7 @@ module Basics.Word8
   , lift
   , unlift
     -- Arithmetic
+  , minus#
   , quot#
   , rem#
     -- Compare
@@ -87,6 +88,9 @@ eq# = eqWord#
 
 neq# :: T# -> T# -> Int#
 neq# = neWord#
+
+minus# :: T# -> T# -> T#
+minus# x y = narrow8Word# (minusWord# x y)
 
 quot# :: T# -> T# -> T#
 quot# = quotWord#

@@ -38,13 +38,17 @@ module Basics.Int64
     -- Constants
   , zero
   , def
+  , minBound
+  , maxBound
+  , infimum
+  , supremum
     -- Metadata
   , signed
     -- Encoding
   , shows
   ) where
 
-import Prelude hiding (shows)
+import Prelude hiding (shows,maxBound,minBound)
 
 import GHC.Exts
 import GHC.Int
@@ -61,6 +65,18 @@ def = 0
 
 zero :: T
 zero = 0
+
+minBound :: T
+minBound = I64# (-9223372036854775808#)
+
+maxBound :: T
+maxBound = I64# (9223372036854775807#)
+
+infimum :: T
+infimum = I64# (-9223372036854775808#)
+
+supremum :: T
+supremum = I64# (9223372036854775807#)
 
 signed :: Bool
 signed = True

@@ -18,6 +18,7 @@ module Basics.Word32
   , eq#
   , neq#
     -- Arithmetic
+  , minus#
   , quot#
   , rem#
     -- Array
@@ -87,6 +88,9 @@ eq# = eqWord#
 
 neq# :: T# -> T# -> Int#
 neq# = neWord#
+
+minus# :: T# -> T# -> T#
+minus# x y = narrow32Word# (minusWord# x y)
 
 quot# :: T# -> T# -> T#
 quot# = quotWord#
