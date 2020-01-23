@@ -23,6 +23,7 @@ library
     Basics.Int8
     Basics.Int64
     Basics.ShortText
+    Basics.ShortTexts
     Basics.Word
     Basics.Word8
     Basics.Word16
