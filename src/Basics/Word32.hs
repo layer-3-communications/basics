@@ -34,6 +34,8 @@ module Basics.Word32
     -- Constants
   , zero
   , def
+  , maxBound
+  , minBound
     -- Metadata
   , signed
   , size
@@ -41,7 +43,7 @@ module Basics.Word32
   , shows
   ) where
 
-import Prelude hiding (shows)
+import Prelude hiding (shows,minBound,maxBound)
 
 import GHC.Exts hiding (setByteArray#)
 import GHC.Word
@@ -58,6 +60,12 @@ def = 0
 
 zero :: T
 zero = 0
+
+maxBound :: T
+maxBound = 4294967295
+
+minBound :: T
+minBound = 0
 
 signed :: Bool
 signed = False
