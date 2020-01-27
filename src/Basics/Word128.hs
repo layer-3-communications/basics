@@ -30,13 +30,15 @@ module Basics.Word128
   , shrink#
     -- Constants
   , def
+  , minBound
+  , maxBound
     -- Metadata
   , size
     -- Encoding
   , shows
   ) where
 
-import Prelude hiding (shows)
+import Prelude hiding (shows,minBound,maxBound)
 
 import Data.WideWord.Word128 (Word128(Word128))
 import GHC.Exts hiding (setByteArray#)
@@ -51,6 +53,12 @@ type R = 'TupleRep '[ 'WordRep, 'WordRep ]
 
 def :: T
 def = 0
+
+maxBound :: T
+maxBound = Word128 18446744073709551615 18446744073709551615
+
+minBound :: T
+minBound = 0
 
 size :: Int
 size = 16

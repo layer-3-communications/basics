@@ -38,6 +38,8 @@ module Basics.Word16
     -- Constants
   , def
   , zero
+  , maxBound
+  , minBound
     -- Metadata
   , signed
   , size
@@ -45,7 +47,7 @@ module Basics.Word16
   , shows
   ) where
 
-import Prelude hiding (shows)
+import Prelude hiding (shows,minBound,maxBound)
 
 import GHC.Exts hiding (setByteArray#)
 import GHC.Word
@@ -68,6 +70,12 @@ signed = False
 
 size :: Int
 size = 2
+
+maxBound :: T
+maxBound = 65535
+
+minBound :: T
+minBound = 0
 
 lift :: T# -> T
 lift = W16#
