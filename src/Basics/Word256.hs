@@ -69,18 +69,18 @@ index# arr# i# =
   #)
 
 read# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, T# #)
-read# arr# i# s0 = case Exts.readWordArray# arr# (2# *# i#) s0 of
-  (# s1, i0 #) -> case Exts.readWordArray# arr# ((2# *# i#) +# 1#) s1 of
-    (# s2, i1 #) -> case Exts.readWordArray# arr# ((2# *# i#) +# 2#) s2 of
-      (# s3, i2 #) -> case Exts.readWordArray# arr# ((2# *# i#) +# 3#) s3 of
+read# arr# i# s0 = case Exts.readWordArray# arr# (4# *# i#) s0 of
+  (# s1, i0 #) -> case Exts.readWordArray# arr# ((4# *# i#) +# 1#) s1 of
+    (# s2, i1 #) -> case Exts.readWordArray# arr# ((4# *# i#) +# 2#) s2 of
+      (# s3, i2 #) -> case Exts.readWordArray# arr# ((4# *# i#) +# 3#) s3 of
         (# s4, i3 #) -> (# s4, (# i0, i1, i2, i3 #) #)
 
 write# :: MutableByteArray# s -> Int# -> T# -> State# s -> State# s
 write# arr# i# (# a, b, c, d #) s0 =
-  case Exts.writeWordArray# arr# (2# *# i#) a s0 of
-    s1 -> case Exts.writeWordArray# arr# ((2# *# i#) +# 1#) b s1 of
-      s2 -> case Exts.writeWordArray# arr# ((2# *# i#) +# 2#) c s2 of
-        s3 -> case Exts.writeWordArray# arr# ((2# *# i#) +# 3#) d s3 of
+  case Exts.writeWordArray# arr# (4# *# i#) a s0 of
+    s1 -> case Exts.writeWordArray# arr# ((4# *# i#) +# 1#) b s1 of
+      s2 -> case Exts.writeWordArray# arr# ((4# *# i#) +# 2#) c s2 of
+        s3 -> case Exts.writeWordArray# arr# ((4# *# i#) +# 3#) d s3 of
           s4 -> s4
 
 set# :: MutableByteArray# s -> Int# -> Int# -> T# -> State# s -> State# s
