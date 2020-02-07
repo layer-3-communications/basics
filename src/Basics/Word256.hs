@@ -33,7 +33,7 @@ import Data.WideWord.Word256 (Word256(Word256))
 import GHC.Exts hiding (setByteArray#)
 import GHC.Word (Word64(W64#))
 
-import qualified Prelude
+import qualified Data.WideWord.Word256 as Word256
 import qualified GHC.Exts as Exts
 
 type T = Word256
@@ -110,4 +110,4 @@ shrink# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, MutableByteAr
 shrink# m i s0 = (# Exts.shrinkMutableByteArray# m (i *# 32#) s0, m #)
 
 shows :: T -> String -> String
-shows = Prelude.shows
+shows x = (Word256.showHexWord256 x ++)
