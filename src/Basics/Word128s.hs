@@ -83,30 +83,21 @@ shrink# m sz s0 = case uninitialized# sz s0 of
   (# s1, dst #) -> case copyMutable# dst 0# m 0# sz s1 of
     s2 -> (# s2, dst #)
 
-eq# :: ArrayArray# -> ArrayArray# -> Int#
+eq# :: ByteArray# -> ByteArray# -> Int#
 eq# a b = case lenA ==# lenB of
-  1# ->
-    let go (-1#) = 1#
-        go ix =
-          let x = Exts.indexByteArrayArray# a ix
-              y = Exts.indexByteArrayArray# b ix
-              lenX = Exts.sizeofByteArray# x
-              lenY = Exts.sizeofByteArray# y
-           in case lenX ==# lenY of
-                1# -> case Exts.compareByteArrays# x 0# y 0# lenX of
-                  0# -> go (ix -# 1#)
-                  _ -> 0#
-                _ -> 0#
-     in go (lenA -# 1#)
+  1# -> Exts.compareByteArrays# a 0# b 0# lenA ==# 0#
   _ -> 0#
   where
-  !lenA = Exts.sizeofArrayArray# a
-  !lenB = Exts.sizeofArrayArray# b
+  !lenA = Exts.sizeofByteArray# a
+  !lenB = Exts.sizeofByteArray# b
 
-neq# :: ArrayArray# -> ArrayArray# -> Int#
-neq# a b = case eq# a b of
-  1# -> 0#
+neq# :: ByteArray# -> ByteArray# -> Int#
+neq# a b = case lenA ==# lenB of
+  1# -> Exts.compareByteArrays# a 0# b 0# lenA /=# 0#
   _ -> 1#
+  where
+  !lenA = Exts.sizeofByteArray# a
+  !lenB = Exts.sizeofByteArray# b
 
 -- TODO: fix this
 shows :: T -> String -> String
