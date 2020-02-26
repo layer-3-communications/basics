@@ -30,6 +30,8 @@ module Basics.Word32
   , index
   , uninitialized#
   , initialized#
+  , uninitialized
+  , initialized
   , copy#
   , copyMutable#
   , set#
@@ -147,6 +149,14 @@ initialized# ::
 initialized# n e s0 = case uninitialized# n s0 of
   (# s1, a #) -> case set# a 0# n e s1 of
     s2 -> (# s2, a #)
+
+uninitialized :: Int -> ST s (MutableByteArray s)
+uninitialized (I# sz) = ST $ \s0 -> case uninitialized# sz s0 of
+  (# s1, a #) -> (# s1, MutableByteArray a #)
+
+initialized :: Int -> T -> ST s (MutableByteArray s)
+initialized (I# sz) e = ST $ \s0 -> case initialized# sz (unlift e) s0 of
+  (# s1, a #) -> (# s1, MutableByteArray a #)
 
 copy# :: MutableByteArray# s -> Int# -> ByteArray# -> Int# -> Int# -> State# s -> State# s
 copy# dst doff src soff len =
