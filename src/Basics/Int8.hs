@@ -24,6 +24,8 @@ module Basics.Int8
   , set#
   , uninitialized#
   , initialized#
+  , uninitialized
+  , initialized
   , copy#
   , copyMutable#
   , shrink#
@@ -39,8 +41,10 @@ module Basics.Int8
 
 import Prelude hiding (shows)
 
+import Data.Primitive (MutableByteArray(..))
 import GHC.Exts hiding (setByteArray#)
 import GHC.Int
+import GHC.ST (ST(ST))
 
 import qualified Prelude
 import qualified GHC.Exts as Exts
@@ -102,6 +106,14 @@ shrink# m i s = (# Exts.shrinkMutableByteArray# m i s, m #)
 
 uninitialized# :: Int# -> State# s -> (# State# s, MutableByteArray# s #)
 uninitialized# = Exts.newByteArray#
+
+uninitialized :: Int -> ST s (MutableByteArray s)
+uninitialized (I# sz) = ST $ \s0 -> case uninitialized# sz s0 of
+  (# s1, a #) -> (# s1, MutableByteArray a #)
+
+initialized :: Int -> T -> ST s (MutableByteArray s)
+initialized (I# sz) e = ST $ \s0 -> case initialized# sz (unlift e) s0 of
+  (# s1, a #) -> (# s1, MutableByteArray a #)
 
 copy# :: MutableByteArray# s -> Int# -> ByteArray# -> Int# -> Int# -> State# s -> State# s
 copy# dst doff src soff len =

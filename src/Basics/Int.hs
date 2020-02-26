@@ -32,6 +32,8 @@ module Basics.Int
   , set#
   , uninitialized#
   , initialized#
+  , uninitialized
+  , initialized
   , copy#
   , copyMutable#
   , shrink#
@@ -47,9 +49,11 @@ module Basics.Int
 
 import Prelude hiding (shows)
 
+import Data.Primitive (MutableByteArray(..))
+import GHC.Exts ((+#),(*#),(-#))
 import GHC.Exts (Int(I#),RuntimeRep(IntRep))
 import GHC.Exts (State#,MutableByteArray#,Int#,ByteArray#)
-import GHC.Exts ((+#),(*#),(-#))
+import GHC.ST (ST(ST))
 
 import qualified Prelude
 import qualified GHC.Exts as Exts
@@ -139,6 +143,14 @@ initialized# ::
 initialized# n e s0 = case uninitialized# n s0 of
   (# s1, a #) -> case set# a 0# n e s1 of
     s2 -> (# s2, a #)
+
+uninitialized :: Int -> ST s (MutableByteArray s)
+uninitialized (I# sz) = ST $ \s0 -> case uninitialized# sz s0 of
+  (# s1, a #) -> (# s1, MutableByteArray a #)
+
+initialized :: Int -> T -> ST s (MutableByteArray s)
+initialized (I# sz) e = ST $ \s0 -> case initialized# sz (unlift e) s0 of
+  (# s1, a #) -> (# s1, MutableByteArray a #)
 
 copy# :: MutableByteArray# s -> Int# -> ByteArray# -> Int# -> Int# -> State# s -> State# s
 copy# dst doff src soff len = Exts.copyByteArray#

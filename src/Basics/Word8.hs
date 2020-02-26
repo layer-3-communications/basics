@@ -28,6 +28,8 @@ module Basics.Word8
   , set#
   , uninitialized#
   , initialized#
+  , uninitialized
+  , initialized
   , copy#
   , copyMutable#
   , shrink#
@@ -45,7 +47,9 @@ module Basics.Word8
 
 import Prelude hiding (shows,minBound,maxBound)
 
+import Data.Primitive (MutableByteArray(..))
 import GHC.Exts hiding (setByteArray#)
+import GHC.ST (ST(ST))
 import GHC.Word
 
 import qualified Prelude
@@ -128,6 +132,14 @@ initialized# :: Int# -> T# -> State# s -> (# State# s, MutableByteArray# s #)
 initialized# n e s0 = case Exts.newByteArray# n s0 of
   (# s1, a #) -> case set# a 0# n e s1 of
     s2 -> (# s2, a #)
+
+uninitialized :: Int -> ST s (MutableByteArray s)
+uninitialized (I# sz) = ST $ \s0 -> case uninitialized# sz s0 of
+  (# s1, a #) -> (# s1, MutableByteArray a #)
+
+initialized :: Int -> T -> ST s (MutableByteArray s)
+initialized (I# sz) e = ST $ \s0 -> case initialized# sz (unlift e) s0 of
+  (# s1, a #) -> (# s1, MutableByteArray a #)
 
 copy# :: MutableByteArray# s -> Int# -> ByteArray# -> Int# -> Int# -> State# s -> State# s
 copy# dst doff src soff len =
