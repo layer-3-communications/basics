@@ -21,6 +21,12 @@ module Basics.Word8
   , lte#
   , eq#
   , neq#
+  , gt
+  , lt
+  , gte
+  , lte
+  , eq
+  , neq
     -- Array
   , read#
   , write#
@@ -100,6 +106,24 @@ eq# = eqWord#
 
 neq# :: T# -> T# -> Int#
 neq# = neWord#
+
+gt :: T -> T -> Bool
+gt = (>)
+
+lt :: T -> T -> Bool
+lt = (<)
+
+gte :: T -> T -> Bool
+gte = (>=)
+
+lte :: T -> T -> Bool
+lte = (<=)
+
+eq :: T -> T -> Bool
+eq = (==)
+
+neq :: T -> T -> Bool
+neq = (/=)
 
 minus# :: T# -> T# -> T#
 minus# x y = narrow8Word# (minusWord# x y)

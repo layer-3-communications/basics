@@ -25,6 +25,12 @@ module Basics.Int64
   , lte#
   , eq#
   , neq#
+  , gt
+  , lt
+  , gte
+  , lte
+  , eq
+  , neq
     -- Array
   , read#
   , write#
@@ -133,6 +139,24 @@ eq# = (==#)
 
 neq# :: T# -> T# -> Int#
 neq# = (/=#)
+
+gt :: T -> T -> Bool
+gt = (>)
+
+lt :: T -> T -> Bool
+lt = (<)
+
+gte :: T -> T -> Bool
+gte = (>=)
+
+lte :: T -> T -> Bool
+lte = (<=)
+
+eq :: T -> T -> Bool
+eq = (==)
+
+neq :: T -> T -> Bool
+neq = (/=)
 
 index# :: ByteArray# -> Int# -> T#
 index# = indexIntArray#
