@@ -25,12 +25,16 @@ module Basics.Word32
   , read#
   , write#
   , index#
+  , read
+  , write
+  , index
   , uninitialized#
   , initialized#
   , copy#
   , copyMutable#
   , set#
   , shrink#
+  , shrink
     -- Constants
   , zero
   , def
@@ -43,10 +47,12 @@ module Basics.Word32
   , shows
   ) where
 
-import Prelude hiding (shows,minBound,maxBound)
+import Prelude hiding (shows,minBound,maxBound,read)
 
 import GHC.Exts hiding (setByteArray#)
 import GHC.Word
+import GHC.ST (ST(ST))
+import Data.Primitive (MutableByteArray(..),ByteArray(..))
 
 import qualified Prelude
 import qualified GHC.Exts as Exts
@@ -115,6 +121,18 @@ read# = readWord32Array#
 write# :: MutableByteArray# s -> Int# -> T# -> State# s -> State# s
 write# = writeWord32Array#
 
+index :: ByteArray -> Int -> T
+index (ByteArray x) (I# i) = W32# (indexWord32Array# x i)
+
+read :: MutableByteArray s -> Int -> ST s T
+read (MutableByteArray x) (I# i) = ST
+  (\s0 -> case readWord32Array# x i s0 of
+    (# s1, r #) -> (# s1, W32# r #)
+  )
+
+write :: MutableByteArray s -> Int -> T -> ST s ()
+write (MutableByteArray x) (I# i) (W32# e) = ST (\s -> (# writeWord32Array# x i e s, () #) )
+
 set# :: MutableByteArray# s -> Int# -> Int# -> T# -> State# s -> State# s
 set# marr off len x s = case len of
   0# -> s
@@ -140,6 +158,12 @@ copyMutable# dst doff src soff len =
 
 shrink# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, MutableByteArray# s #)
 shrink# m i s0 = (# Exts.shrinkMutableByteArray# m (i *# 4#) s0, m #)
+
+shrink :: MutableByteArray s -> Int -> ST s (MutableByteArray s)
+shrink (MutableByteArray x) (I# i) = ST
+  (\s0 -> case shrink# x i s0 of
+    (# s1, r #) -> (# s1, MutableByteArray r #)
+  )
 
 shows :: T -> String -> String
 shows = Prelude.shows

@@ -29,12 +29,16 @@ module Basics.Word16
   , read#
   , write#
   , index#
+  , read
+  , write
+  , index
   , uninitialized#
   , initialized#
   , copy#
   , copyMutable#
   , set#
   , shrink#
+  , shrink
     -- Constants
   , def
   , zero
@@ -47,10 +51,12 @@ module Basics.Word16
   , shows
   ) where
 
-import Prelude hiding (shows,minBound,maxBound)
+import Prelude hiding (shows,minBound,maxBound,read)
 
 import GHC.Exts hiding (setByteArray#)
 import GHC.Word
+import GHC.ST (ST(ST))
+import Data.Primitive (MutableByteArray(..),ByteArray(..))
 
 import qualified Prelude
 import qualified GHC.Exts as Exts
@@ -159,3 +165,21 @@ shrink# m i s = (# Exts.shrinkMutableByteArray# m (i *# 2# ) s, m #)
 
 shows :: T -> String -> String
 shows = Prelude.shows
+
+shrink :: MutableByteArray s -> Int -> ST s (MutableByteArray s)
+shrink (MutableByteArray x) (I# i) = ST
+  (\s0 -> case shrink# x i s0 of
+    (# s1, r #) -> (# s1, MutableByteArray r #)
+  )
+
+index :: ByteArray -> Int -> T
+index (ByteArray x) (I# i) = W16# (indexWord16Array# x i)
+
+read :: MutableByteArray s -> Int -> ST s T
+read (MutableByteArray x) (I# i) = ST
+  (\s0 -> case readWord16Array# x i s0 of
+    (# s1, r #) -> (# s1, W16# r #)
+  )
+
+write :: MutableByteArray s -> Int -> T -> ST s ()
+write (MutableByteArray x) (I# i) (W16# e) = ST (\s -> (# writeWord16Array# x i e s, () #) )

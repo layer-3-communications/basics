@@ -29,12 +29,16 @@ module Basics.Int64
   , read#
   , write#
   , index#
+  , read
+  , write
+  , index
   , uninitialized#
   , initialized#
   , copy#
   , copyMutable#
   , set#
   , shrink#
+  , shrink
     -- Constants
   , zero
   , def
@@ -48,10 +52,12 @@ module Basics.Int64
   , shows
   ) where
 
-import Prelude hiding (shows,maxBound,minBound)
+import Prelude hiding (shows,maxBound,minBound,read)
 
 import GHC.Exts
 import GHC.Int
+import Data.Primitive (MutableByteArray(..),ByteArray(..))
+import GHC.ST (ST(ST))
 
 import qualified Prelude
 import qualified GHC.Exts as Exts
@@ -163,3 +169,21 @@ copyMutable# dst doff src soff len =
 
 shows :: T -> String -> String
 shows = Prelude.shows
+
+index :: ByteArray -> Int -> T
+index (ByteArray x) (I# i) = I64# (indexInt64Array# x i)
+
+read :: MutableByteArray s -> Int -> ST s T
+read (MutableByteArray x) (I# i) = ST
+  (\s0 -> case readInt64Array# x i s0 of
+    (# s1, r #) -> (# s1, I64# r #)
+  )
+
+write :: MutableByteArray s -> Int -> T -> ST s ()
+write (MutableByteArray x) (I# i) (I64# e) = ST (\s -> (# writeInt64Array# x i e s, () #) )
+
+shrink :: MutableByteArray s -> Int -> ST s (MutableByteArray s)
+shrink (MutableByteArray x) (I# i) = ST
+  (\s0 -> case shrink# x i s0 of
+    (# s1, r #) -> (# s1, MutableByteArray r #)
+  )

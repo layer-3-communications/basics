@@ -1,5 +1,6 @@
 {-# language DataKinds #-}
 {-# language MagicHash #-}
+{-# language TypeApplications #-}
 {-# language UnboxedTuples #-}
 
 module Basics.Word128
@@ -43,8 +44,10 @@ import Prelude hiding (shows,minBound,maxBound)
 import Data.WideWord.Word128 (Word128(Word128))
 import GHC.Exts hiding (setByteArray#)
 import GHC.Word (Word64(W64#))
+import Data.Primitive (MutableByteArray(..),ByteArray(..))
 
 import qualified Prelude
+import qualified Data.Primitive as PM
 import qualified GHC.Exts as Exts
 
 type T = Word128
