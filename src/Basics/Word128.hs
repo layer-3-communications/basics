@@ -2,6 +2,7 @@
 {-# language MagicHash #-}
 {-# language TypeApplications #-}
 {-# language UnboxedTuples #-}
+{-# language ViewPatterns #-}
 
 module Basics.Word128
   ( -- Types
@@ -16,6 +17,12 @@ module Basics.Word128
   , neq#
   , lt#
   , gt#
+  , gt
+  , gte
+  , lt
+  , lte
+  , eq
+  , neq
     -- Arithmetic
   , minus#
   , quot#
@@ -23,14 +30,21 @@ module Basics.Word128
   , read#
   , write#
   , index#
+  , read
+  , write
+  , index
   , set#
   , uninitialized#
   , initialized#
+  , uninitialized
+  , initialized
   , copy#
   , copyMutable#
   , shrink#
+  , shrink
     -- Constants
   , def
+  , zero
   , minBound
   , maxBound
     -- Metadata
@@ -39,15 +53,15 @@ module Basics.Word128
   , shows
   ) where
 
-import Prelude hiding (shows,minBound,maxBound)
+import Prelude hiding (shows,minBound,maxBound,read)
 
+import Data.Primitive (MutableByteArray(..),ByteArray(..))
 import Data.WideWord.Word128 (Word128(Word128))
 import GHC.Exts hiding (setByteArray#)
+import GHC.ST (ST(ST))
 import GHC.Word (Word64(W64#))
-import Data.Primitive (MutableByteArray(..),ByteArray(..))
 
 import qualified Prelude
-import qualified Data.Primitive as PM
 import qualified GHC.Exts as Exts
 
 type T = Word128
@@ -56,6 +70,9 @@ type R = 'TupleRep '[ 'WordRep, 'WordRep ]
 
 def :: T
 def = 0
+
+zero :: T
+zero = 0
 
 maxBound :: T
 maxBound = Word128 18446744073709551615 18446744073709551615
@@ -80,6 +97,18 @@ gt# (# a1, a2 #) (# b1, b2 #) = case gtWord# a1 b1 of
     1# -> gtWord# a2 b2
     _ -> 0#
 
+gt :: T -> T -> Bool
+gt = (>)
+
+lt :: T -> T -> Bool
+lt = (<)
+
+gte :: T -> T -> Bool
+gte = (>=)
+
+lte :: T -> T -> Bool
+lte = (<=)
+
 quot# :: T# -> T# -> T#
 quot# (# a1, a2 #) (# b1, b2 #) =
   case quot (Word128 (W64# a1) (W64# a2)) (Word128 (W64# b1) (W64# b2)) of
@@ -102,6 +131,12 @@ eq# (# x1, y1 #) (# x2, y2 #) = ((eqWord# x1 x2) `andI#` (eqWord# y1 y2))
 neq# :: T# -> T# -> Int#
 neq# (# x1, y1 #) (# x2, y2 #) = ((neWord# x1 x2) `orI#` (neWord# y1 y2))
 
+eq :: T -> T -> Bool
+eq = (==)
+
+neq :: T -> T -> Bool
+neq = (/=)
+
 index# :: ByteArray# -> Int# -> T#
 index# arr# i# =
   (# Exts.indexWordArray# arr# (2# *# i#)
@@ -118,6 +153,18 @@ write# arr# i# (# a, b #) s0 =
     s1 -> case Exts.writeWordArray# arr# ((2# *# i#) +# 1#) b s1 of
       s2 -> s2
 
+index :: ByteArray -> Int -> T
+index (ByteArray x) (I# i) = lift (index# x i)
+
+read :: MutableByteArray s -> Int -> ST s T
+read (MutableByteArray x) (I# i) = ST
+  (\s0 -> case read# x i s0 of
+    (# s1, r #) -> (# s1, lift r #)
+  )
+
+write :: MutableByteArray s -> Int -> T -> ST s ()
+write (MutableByteArray x) (I# i) (unlift -> e) = ST (\s -> (# write# x i e s, () #) )
+
 set# :: MutableByteArray# s -> Int# -> Int# -> T# -> State# s -> State# s
 set# marr off len x s = case len of
   0# -> s
@@ -133,6 +180,14 @@ initialized# n e s0 = case uninitialized# n s0 of
   (# s1, a #) -> case set# a 0# n e s1 of
     s2 -> (# s2, a #)
 
+uninitialized :: Int -> ST s (MutableByteArray s)
+uninitialized (I# sz) = ST $ \s0 -> case uninitialized# sz s0 of
+  (# s1, a #) -> (# s1, MutableByteArray a #)
+
+initialized :: Int -> T -> ST s (MutableByteArray s)
+initialized (I# sz) e = ST $ \s0 -> case initialized# sz (unlift e) s0 of
+  (# s1, a #) -> (# s1, MutableByteArray a #)
+
 copy# :: MutableByteArray# s -> Int# -> ByteArray# -> Int# -> Int# -> State# s -> State# s
 copy# dst doff src soff len =
   Exts.copyByteArray# src (soff *# 16#) dst (doff *# 16#) (len *# 16#)
@@ -143,6 +198,12 @@ copyMutable# dst doff src soff len =
 
 shrink# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, MutableByteArray# s #)
 shrink# m i s0 = (# Exts.shrinkMutableByteArray# m (i *# 16#) s0, m #)
+
+shrink :: MutableByteArray s -> Int -> ST s (MutableByteArray s)
+shrink (MutableByteArray x) (I# i) = ST
+  (\s0 -> case shrink# x i s0 of
+    (# s1, r #) -> (# s1, MutableByteArray r #)
+  )
 
 shows :: T -> String -> String
 shows = Prelude.shows
