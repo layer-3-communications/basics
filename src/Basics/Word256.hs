@@ -1,7 +1,10 @@
+{-# language CPP #-}
 {-# language BangPatterns #-}
 {-# language DataKinds #-}
 {-# language MagicHash #-}
 {-# language UnboxedTuples #-}
+
+#include <MachDeps.h>
 
 module Basics.Word256
   ( -- Types
@@ -60,29 +63,6 @@ neq# (# x1, y1, z1, w1 #) (# x2, y2, z2, w2 #) =
   (neWord# z1 z2) `orI#`
   (neWord# w1 w2)
 
-index# :: ByteArray# -> Int# -> T#
-index# arr# i# =
-  (# Exts.indexWordArray# arr# (4# *# i#)
-  ,  Exts.indexWordArray# arr# ((4# *# i#) +# 1#)
-  ,  Exts.indexWordArray# arr# ((4# *# i#) +# 2#)
-  ,  Exts.indexWordArray# arr# ((4# *# i#) +# 3#)
-  #)
-
-read# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, T# #)
-read# arr# i# s0 = case Exts.readWordArray# arr# (4# *# i#) s0 of
-  (# s1, i0 #) -> case Exts.readWordArray# arr# ((4# *# i#) +# 1#) s1 of
-    (# s2, i1 #) -> case Exts.readWordArray# arr# ((4# *# i#) +# 2#) s2 of
-      (# s3, i2 #) -> case Exts.readWordArray# arr# ((4# *# i#) +# 3#) s3 of
-        (# s4, i3 #) -> (# s4, (# i0, i1, i2, i3 #) #)
-
-write# :: MutableByteArray# s -> Int# -> T# -> State# s -> State# s
-write# arr# i# (# a, b, c, d #) s0 =
-  case Exts.writeWordArray# arr# (4# *# i#) a s0 of
-    s1 -> case Exts.writeWordArray# arr# ((4# *# i#) +# 1#) b s1 of
-      s2 -> case Exts.writeWordArray# arr# ((4# *# i#) +# 2#) c s2 of
-        s3 -> case Exts.writeWordArray# arr# ((4# *# i#) +# 3#) d s3 of
-          s4 -> s4
-
 set# :: MutableByteArray# s -> Int# -> Int# -> T# -> State# s -> State# s
 set# marr off len x s = case len of
   0# -> s
@@ -111,3 +91,51 @@ shrink# m i s0 = (# Exts.shrinkMutableByteArray# m (i *# 32#) s0, m #)
 
 shows :: T -> String -> String
 shows x = (Word256.showHexWord256 x ++)
+
+#if WORDS_BIGENDIAN
+index# :: ByteArray# -> Int# -> T#
+index# arr# i# =
+  (# Exts.indexWordArray# arr# (4# *# i#)
+  ,  Exts.indexWordArray# arr# ((4# *# i#) +# 1#)
+  ,  Exts.indexWordArray# arr# ((4# *# i#) +# 2#)
+  ,  Exts.indexWordArray# arr# ((4# *# i#) +# 3#)
+  #)
+
+read# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, T# #)
+read# arr# i# s0 = case Exts.readWordArray# arr# (4# *# i#) s0 of
+  (# s1, i0 #) -> case Exts.readWordArray# arr# ((4# *# i#) +# 1#) s1 of
+    (# s2, i1 #) -> case Exts.readWordArray# arr# ((4# *# i#) +# 2#) s2 of
+      (# s3, i2 #) -> case Exts.readWordArray# arr# ((4# *# i#) +# 3#) s3 of
+        (# s4, i3 #) -> (# s4, (# i0, i1, i2, i3 #) #)
+
+write# :: MutableByteArray# s -> Int# -> T# -> State# s -> State# s
+write# arr# i# (# a, b, c, d #) s0 =
+  case Exts.writeWordArray# arr# (4# *# i#) a s0 of
+    s1 -> case Exts.writeWordArray# arr# ((4# *# i#) +# 1#) b s1 of
+      s2 -> case Exts.writeWordArray# arr# ((4# *# i#) +# 2#) c s2 of
+        s3 -> case Exts.writeWordArray# arr# ((4# *# i#) +# 3#) d s3 of
+          s4 -> s4
+#else
+index# :: ByteArray# -> Int# -> T#
+index# arr# i# =
+  (# Exts.indexWordArray# arr# ((4# *# i#) +# 3#)
+  ,  Exts.indexWordArray# arr# ((4# *# i#) +# 2#)
+  ,  Exts.indexWordArray# arr# ((4# *# i#) +# 1#)
+  ,  Exts.indexWordArray# arr# (4# *# i#)
+  #)
+
+read# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, T# #)
+read# arr# i# s0 = case Exts.readWordArray# arr# ((4# *# i#) +# 3#) s0 of
+  (# s1, i0 #) -> case Exts.readWordArray# arr# ((4# *# i#) +# 2#) s1 of
+    (# s2, i1 #) -> case Exts.readWordArray# arr# ((4# *# i#) +# 1#) s2 of
+      (# s3, i2 #) -> case Exts.readWordArray# arr# (4# *# i#) s3 of
+        (# s4, i3 #) -> (# s4, (# i0, i1, i2, i3 #) #)
+
+write# :: MutableByteArray# s -> Int# -> T# -> State# s -> State# s
+write# arr# i# (# a, b, c, d #) s0 =
+  case Exts.writeWordArray# arr# ((4# *# i#) +# 3#) a s0 of
+    s1 -> case Exts.writeWordArray# arr# ((4# *# i#) +# 2#) b s1 of
+      s2 -> case Exts.writeWordArray# arr# ((4# *# i#) +# 1#) c s2 of
+        s3 -> case Exts.writeWordArray# arr# (4# *# i#) d s3 of
+          s4 -> s4
+#endif
