@@ -66,112 +66,147 @@ type T# = Word#
 type R = 'WordRep
 
 def :: T
+{-# inline def #-}
 def = 0
 
 zero :: T
+{-# inline zero #-}
 zero = 0
 
 signed :: Bool
+{-# inline signed #-}
 signed = False
 
 size :: Int
+{-# inline size #-}
 size = 1
 
 maxBound :: T
+{-# inline maxBound #-}
 maxBound = 255
 
 minBound :: T
+{-# inline minBound #-}
 minBound = 0
 
 lift :: T# -> T
+{-# inline lift #-}
 lift = W8#
 
 unlift :: T -> T#
+{-# inline unlift #-}
 unlift (W8# i) = i
 
 gt# :: T# -> T# -> Int#
+{-# inline gt# #-}
 gt# = gtWord#
 
 lt# :: T# -> T# -> Int#
+{-# inline lt# #-}
 lt# = ltWord#
 
 gte# :: T# -> T# -> Int#
+{-# inline gte# #-}
 gte# = geWord#
 
 lte# :: T# -> T# -> Int#
+{-# inline lte# #-}
 lte# = leWord#
 
 eq# :: T# -> T# -> Int#
+{-# inline eq# #-}
 eq# = eqWord#
 
 neq# :: T# -> T# -> Int#
+{-# inline neq# #-}
 neq# = neWord#
 
 gt :: T -> T -> Bool
+{-# inline gt #-}
 gt = (>)
 
 lt :: T -> T -> Bool
+{-# inline lt #-}
 lt = (<)
 
 gte :: T -> T -> Bool
+{-# inline gte #-}
 gte = (>=)
 
 lte :: T -> T -> Bool
+{-# inline lte #-}
 lte = (<=)
 
 eq :: T -> T -> Bool
+{-# inline eq #-}
 eq = (==)
 
 neq :: T -> T -> Bool
+{-# inline neq #-}
 neq = (/=)
 
 minus# :: T# -> T# -> T#
+{-# inline minus# #-}
 minus# x y = narrow8Word# (minusWord# x y)
 
 quot# :: T# -> T# -> T#
+{-# inline quot# #-}
 quot# = quotWord#
 
 rem# :: T# -> T# -> T#
+{-# inline rem# #-}
 rem# = remWord#
 
 index# :: ByteArray# -> Int# -> T#
+{-# inline index# #-}
 index# = indexWord8Array#
 
 read# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, T# #)
+{-# inline read# #-}
 read# = readWord8Array#
 
 write# :: MutableByteArray# s -> Int# -> T# -> State# s -> State# s
+{-# inline write# #-}
 write# = writeWord8Array#
 
 set# :: MutableByteArray# s -> Int# -> Int# -> T# -> State# s -> State# s
+{-# inline set# #-}
 set# marr off len x s = Exts.setByteArray# marr off len (word2Int# x) s
 
 shrink# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, MutableByteArray# s #)
+{-# inline shrink# #-}
 shrink# m i s = (# Exts.shrinkMutableByteArray# m i s, m #)
 
 uninitialized# :: Int# -> State# s -> (# State# s, MutableByteArray# s #)
+{-# inline uninitialized# #-}
 uninitialized# = Exts.newByteArray#
 
 initialized# :: Int# -> T# -> State# s -> (# State# s, MutableByteArray# s #)
+{-# inline initialized# #-}
 initialized# n e s0 = case Exts.newByteArray# n s0 of
   (# s1, a #) -> case set# a 0# n e s1 of
     s2 -> (# s2, a #)
 
 uninitialized :: Int -> ST s (MutableByteArray s)
+{-# inline uninitialized #-}
 uninitialized (I# sz) = ST $ \s0 -> case uninitialized# sz s0 of
   (# s1, a #) -> (# s1, MutableByteArray a #)
 
 initialized :: Int -> T -> ST s (MutableByteArray s)
+{-# inline initialized #-}
 initialized (I# sz) e = ST $ \s0 -> case initialized# sz (unlift e) s0 of
   (# s1, a #) -> (# s1, MutableByteArray a #)
 
 copy# :: MutableByteArray# s -> Int# -> ByteArray# -> Int# -> Int# -> State# s -> State# s
+{-# inline copy# #-}
 copy# dst doff src soff len =
   Exts.copyByteArray# src soff dst doff len
 
 copyMutable# :: MutableByteArray# s -> Int# -> MutableByteArray# s -> Int# -> Int# -> State# s -> State# s
+{-# inline copyMutable# #-}
 copyMutable# dst doff src soff len =
   Exts.copyMutableByteArray# src soff dst doff len
 
 shows :: T -> String -> String
+{-# inline shows #-}
 shows = Prelude.shows

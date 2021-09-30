@@ -75,148 +75,192 @@ type T# = Int#
 type R = 'IntRep
 
 def :: T
+{-# inline def #-}
 def = 0
 
 zero :: T
+{-# inline zero #-}
 zero = 0
 
 minBound :: T
+{-# inline minBound #-}
 minBound = I64# (-9223372036854775808#)
 
 maxBound :: T
+{-# inline maxBound #-}
 maxBound = I64# (9223372036854775807#)
 
 infimum :: T
+{-# inline infimum #-}
 infimum = I64# (-9223372036854775808#)
 
 supremum :: T
+{-# inline supremum #-}
 supremum = I64# (9223372036854775807#)
 
 signed :: Bool
+{-# inline signed #-}
 signed = True
 
 lift :: T# -> T
+{-# inline lift #-}
 lift = I64#
 
 unlift :: T -> T#
+{-# inline unlift #-}
 unlift (I64# i) = i
 
 plus :: T -> T -> T
+{-# inline plus #-}
 plus (I64# x) (I64# y) = I64# (x +# y)
 
 minus :: T -> T -> T
+{-# inline minus #-}
 minus (I64# x) (I64# y) = I64# (x -# y)
 
 times# :: T# -> T# -> T#
+{-# inline times# #-}
 times# = (*#)
 
 quot# :: T# -> T# -> T#
+{-# inline quot# #-}
 quot# = quotInt#
 
 rem# :: T# -> T# -> T#
+{-# inline rem# #-}
 rem# = remInt#
 
 plus# :: T# -> T# -> T#
+{-# inline plus# #-}
 plus# = (+#)
 
 minus# :: T# -> T# -> T#
+{-# inline minus# #-}
 minus# = (-#)
 
 gt# :: T# -> T# -> Int#
+{-# inline gt# #-}
 gt# = (>#)
 
 lt# :: T# -> T# -> Int#
+{-# inline lt# #-}
 lt# = (<#)
 
 gte# :: T# -> T# -> Int#
+{-# inline gte# #-}
 gte# = (>=#)
 
 lte# :: T# -> T# -> Int#
+{-# inline lte# #-}
 lte# = (<=#)
 
 eq# :: T# -> T# -> Int#
+{-# inline eq# #-}
 eq# = (==#)
 
 neq# :: T# -> T# -> Int#
+{-# inline neq# #-}
 neq# = (/=#)
 
 gt :: T -> T -> Bool
+{-# inline gt #-}
 gt = (>)
 
 lt :: T -> T -> Bool
+{-# inline lt #-}
 lt = (<)
 
 gte :: T -> T -> Bool
+{-# inline gte #-}
 gte = (>=)
 
 lte :: T -> T -> Bool
+{-# inline lte #-}
 lte = (<=)
 
 eq :: T -> T -> Bool
+{-# inline eq #-}
 eq = (==)
 
 neq :: T -> T -> Bool
+{-# inline neq #-}
 neq = (/=)
 
 index# :: ByteArray# -> Int# -> T#
+{-# inline index# #-}
 index# = indexIntArray#
 
 read# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, T# #)
+{-# inline read# #-}
 read# = readIntArray#
 
 write# :: MutableByteArray# s -> Int# -> T# -> State# s -> State# s
+{-# inline write# #-}
 write# = writeIntArray#
 
 set# :: MutableByteArray# s -> Int# -> Int# -> T# -> State# s -> State# s
+{-# inline set# #-}
 set# marr off len x s = case len of
   0# -> s
   _ -> set# marr (off +# 1# ) (len -# 1# ) x (write# marr off x s)
 
 uninitialized# :: Int# -> State# s -> (# State# s, MutableByteArray# s #)
+{-# inline uninitialized# #-}
 uninitialized# sz = Exts.newByteArray# (sz *# 8# )
 
 initialized# ::
      Int# -> T# -> State# s
   -> (# State# s, MutableByteArray# s #)
+{-# inline initialized# #-}
 initialized# n e s0 = case uninitialized# n s0 of
   (# s1, a #) -> case set# a 0# n e s1 of
     s2 -> (# s2, a #)
 
 uninitialized :: Int -> ST s (MutableByteArray s)
+{-# inline uninitialized #-}
 uninitialized (I# sz) = ST $ \s0 -> case uninitialized# sz s0 of
   (# s1, a #) -> (# s1, MutableByteArray a #)
 
 initialized :: Int -> T -> ST s (MutableByteArray s)
+{-# inline initialized #-}
 initialized (I# sz) e = ST $ \s0 -> case initialized# sz (unlift e) s0 of
   (# s1, a #) -> (# s1, MutableByteArray a #)
 
 shrink# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, MutableByteArray# s #)
+{-# inline shrink# #-}
 shrink# m i s0 = (# Exts.shrinkMutableByteArray# m (i *# 8#) s0, m #)
 
 copy# :: MutableByteArray# s -> Int# -> ByteArray# -> Int# -> Int# -> State# s -> State# s
+{-# inline copy# #-}
 copy# dst doff src soff len =
   Exts.copyByteArray# src (soff *# 8#) dst (doff *# 8#) (len *# 8#)
 
 copyMutable# :: MutableByteArray# s -> Int# -> MutableByteArray# s -> Int# -> Int# -> State# s -> State# s
+{-# inline copyMutable# #-}
 copyMutable# dst doff src soff len =
   Exts.copyMutableByteArray# src (soff *# 8#) dst (doff *# 8#) (len *# 8#)
 
 shows :: T -> String -> String
+{-# inline shows #-}
 shows = Prelude.shows
 
 index :: ByteArray -> Int -> T
+{-# inline index #-}
 index (ByteArray x) (I# i) = I64# (indexInt64Array# x i)
 
 read :: MutableByteArray s -> Int -> ST s T
+{-# inline read #-}
 read (MutableByteArray x) (I# i) = ST
   (\s0 -> case readInt64Array# x i s0 of
     (# s1, r #) -> (# s1, I64# r #)
   )
 
 write :: MutableByteArray s -> Int -> T -> ST s ()
+{-# inline write #-}
 write (MutableByteArray x) (I# i) (I64# e) = ST (\s -> (# writeInt64Array# x i e s, () #) )
 
 shrink :: MutableByteArray s -> Int -> ST s (MutableByteArray s)
+{-# inline shrink #-}
 shrink (MutableByteArray x) (I# i) = ST
   (\s0 -> case shrink# x i s0 of
     (# s1, r #) -> (# s1, MutableByteArray r #)
