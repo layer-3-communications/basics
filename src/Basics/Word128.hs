@@ -72,18 +72,23 @@ type T# = (# Word#, Word# #)
 type R = 'TupleRep '[ 'WordRep, 'WordRep ]
 
 def :: T
+{-# inline def #-}
 def = 0
 
 zero :: T
+{-# inline zero #-}
 zero = 0
 
 maxBound :: T
+{-# inline maxBound #-}
 maxBound = Word128 18446744073709551615 18446744073709551615
 
 minBound :: T
+{-# inline minBound #-}
 minBound = 0
 
 size :: Int
+{-# inline size #-}
 size = 16
 
 lt# :: T# -> T# -> Int#

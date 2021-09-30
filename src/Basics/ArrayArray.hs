@@ -29,17 +29,22 @@ type M# = MutableArrayArray#
 type R = 'UnliftedRep
 
 lift :: A# -> A
+{-# inline lift #-}
 lift = UnliftedArray
 
 unlift :: A -> A#
+{-# inline unlift #-}
 unlift (UnliftedArray i) = i
 
 liftMutable :: M# s -> M s
+{-# inline liftMutable #-}
 liftMutable x = Flip (MutableUnliftedArray x)
 
 unliftMutable :: M s -> M# s
+{-# inline unliftMutable #-}
 unliftMutable (Flip (MutableUnliftedArray i)) = i
 
 unsafeFreeze# :: M# s -> State# s -> (# State# s, A# #)
+{-# inline unsafeFreeze# #-}
 unsafeFreeze# = unsafeFreezeArrayArray#
 
