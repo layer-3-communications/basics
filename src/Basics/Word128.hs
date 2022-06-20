@@ -19,6 +19,7 @@ module Basics.Word128
   , eq#
   , neq#
   , lt#
+  , lte#
   , gt#
   , gt
   , gte
@@ -122,6 +123,14 @@ gte = (>=)
 lte :: T -> T -> Bool
 {-# inline lte #-}
 lte = (<=)
+
+lte# :: T# -> T# -> Int#
+{-# inline lte# #-}
+lte# (# a1, a2 #) (# b1, b2 #) = case ltWord# a1 a2 of
+  1# -> 1#
+  _ -> case eqWord# a1 b1 of
+    1# -> leWord# a2 b2
+    _ -> 0#
 
 quot# :: T# -> T# -> T#
 {-# inline quot# #-}
