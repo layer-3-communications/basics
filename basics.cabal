@@ -1,6 +1,6 @@
 cabal-version: 2.2
 name: basics
-version: 0.1.0.0
+version: 0.2.0.0
 synopsis: Modules for primitive types
 -- description:
 homepage: https://github.com/andrewthad/basics
