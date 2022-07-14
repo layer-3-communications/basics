@@ -37,7 +37,7 @@ import qualified GHC.Exts as Exts
 
 type T = UnliftedArray ShortText
 type T# = ArrayArray#
-type R = 'UnliftedRep
+type R = 'BoxedRep 'Unlifted
 
 lift :: T# -> T
 {-# inline lift #-}

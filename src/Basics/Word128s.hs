@@ -37,7 +37,7 @@ import qualified GHC.Exts as Exts
 
 type T = PrimArray Word128
 type T# = ByteArray#
-type R = 'UnliftedRep
+type R = 'BoxedRep 'Unlifted
 
 lift :: T# -> T
 {-# inline lift #-}

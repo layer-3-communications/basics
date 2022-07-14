@@ -37,7 +37,7 @@ type A = ByteArray
 type A# = ByteArray#
 type M = MutableByteArray
 type M# = MutableByteArray#
-type R = 'UnliftedRep
+type R = 'BoxedRep 'Unlifted
 
 type T = ByteArray
 type T# = ByteArray#

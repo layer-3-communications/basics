@@ -1,3 +1,4 @@
+{-# language BangPatterns #-}
 {-# language DataKinds #-}
 {-# language MagicHash #-}
 {-# language UnboxedTuples #-}
@@ -95,11 +96,11 @@ size = 4
 
 lift :: T# -> T
 {-# inline lift #-}
-lift = W32#
+lift i = W32# (Exts.wordToWord32# i)
 
 unlift :: T -> T#
 {-# inline unlift #-}
-unlift (W32# i) = i
+unlift (W32# i) = Exts.word32ToWord# i
 
 gt# :: T# -> T# -> Int#
 {-# inline gt# #-}
@@ -163,15 +164,17 @@ rem# = remWord#
 
 index# :: ByteArray# -> Int# -> T#
 {-# inline index# #-}
-index# = indexWord32Array#
+index# arr i = Exts.word32ToWord# (indexWord32Array# arr i)
 
 read# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, T# #)
 {-# inline read# #-}
-read# = readWord32Array#
+read# arr i st =
+  let !(# st', v #) = readWord32Array# arr i st
+   in (# st', Exts.word32ToWord# v #)
 
 write# :: MutableByteArray# s -> Int# -> T# -> State# s -> State# s
 {-# inline write# #-}
-write# = writeWord32Array#
+write# arr i v st = writeWord32Array# arr i (Exts.wordToWord32# v) st
 
 index :: ByteArray -> Int -> T
 {-# inline index #-}

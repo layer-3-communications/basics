@@ -1,3 +1,4 @@
+{-# language BangPatterns #-}
 {-# language DataKinds #-}
 {-# language LambdaCase #-}
 {-# language MagicHash #-}
@@ -76,15 +77,17 @@ neq# = (Exts./=#)
 
 index# :: ByteArray# -> Int# -> T#
 {-# inline index# #-}
-index# = Exts.indexInt8Array#
+index# arr i = Exts.int8ToInt# (Exts.indexInt8Array# arr i)
 
 read# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, T# #)
 {-# inline read# #-}
-read# = Exts.readInt8Array#
+read# arr i st =
+  let !(# st', v #) = Exts.readInt8Array# arr i st
+   in (# st', Exts.int8ToInt# v #)
 
 write# :: MutableByteArray# s -> Int# -> T# -> State# s -> State# s
 {-# inline write# #-}
-write# = Exts.writeInt8Array#
+write# arr i v st = Exts.writeInt8Array# arr i (Exts.intToInt8# v) st
 
 set# :: MutableByteArray# s -> Int# -> Int# -> T# -> State# s -> State# s
 {-# inline set# #-}

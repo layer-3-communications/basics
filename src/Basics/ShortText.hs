@@ -40,7 +40,7 @@ import qualified Data.Text.Short.Unsafe as TS
 
 type T = ShortText
 type T# = ByteArray#
-type R = 'UnliftedRep
+type R = 'BoxedRep 'Unlifted
 
 lift :: T# -> T
 {-# inline lift #-}

@@ -26,7 +26,7 @@ type A = UnliftedArray ()
 type A# = ArrayArray#
 type M = Flip MutableUnliftedArray ()
 type M# = MutableArrayArray#
-type R = 'UnliftedRep
+type R = 'BoxedRep 'Unlifted
 
 lift :: A# -> A
 {-# inline lift #-}

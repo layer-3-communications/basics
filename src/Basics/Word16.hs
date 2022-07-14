@@ -1,3 +1,4 @@
+{-# language BangPatterns #-}
 {-# language DataKinds #-}
 {-# language MagicHash #-}
 {-# language UnboxedTuples #-}
@@ -99,19 +100,19 @@ minBound = 0
 
 lift :: T# -> T
 {-# inline lift #-}
-lift = W16#
+lift i = W16# (Exts.wordToWord16# i)
 
 unlift :: T -> T#
 {-# inline unlift #-}
-unlift (W16# i) = i
+unlift (W16# i) = Exts.word16ToWord# i
 
 plus :: T -> T -> T
 {-# inline plus #-}
-plus (W16# x) (W16# y) = W16# (plusWord# x y)
+plus (W16# x) (W16# y) = W16# (plusWord16# x y)
 
 minus :: T -> T -> T
 {-# inline minus #-}
-minus (W16# x) (W16# y) = W16# (minusWord# x y)
+minus (W16# x) (W16# y) = W16# (subWord16# x y)
 
 times# :: T# -> T# -> T#
 {-# inline times# #-}
@@ -183,15 +184,17 @@ neq = (/=)
 
 index# :: ByteArray# -> Int# -> T#
 {-# inline index# #-}
-index# = indexWord16Array#
+index# arr i = Exts.word16ToWord# (indexWord16Array# arr i)
 
 read# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, T# #)
 {-# inline read# #-}
-read# = readWord16Array#
+read# arr i st =
+  let !(# st', v #) = readWord16Array# arr i st
+   in (# st', Exts.word16ToWord# v #)
 
 write# :: MutableByteArray# s -> Int# -> T# -> State# s -> State# s
 {-# inline write# #-}
-write# = writeWord16Array#
+write# arr i v st = writeWord16Array# arr i (Exts.wordToWord16# v) st
 
 set# :: MutableByteArray# s -> Int# -> Int# -> T# -> State# s -> State# s
 {-# inline set# #-}

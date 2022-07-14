@@ -1,3 +1,4 @@
+{-# language BangPatterns #-}
 {-# language DataKinds #-}
 {-# language MagicHash #-}
 {-# language UnboxedTuples #-}
@@ -77,11 +78,11 @@ size = 1
 
 lift :: T# -> T
 {-# inline lift #-}
-lift = I8#
+lift i = I8# (Exts.intToInt8# i)
 
 unlift :: T -> T#
 {-# inline unlift #-}
-unlift (I8# i) = i
+unlift (I8# i) = Exts.int8ToInt# i
 
 gt# :: T# -> T# -> Int#
 {-# inline gt# #-}
@@ -133,15 +134,17 @@ neq = (/=)
 
 index# :: ByteArray# -> Int# -> T#
 {-# inline index# #-}
-index# = indexInt8Array#
+index# arr i = Exts.int8ToInt# (indexInt8Array# arr i)
 
 read# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, T# #)
 {-# inline read# #-}
-read# = readInt8Array#
+read# arr i st =
+  let !(# st', v #) = readInt8Array# arr i st
+   in (# st', Exts.int8ToInt# v #)
 
 write# :: MutableByteArray# s -> Int# -> T# -> State# s -> State# s
 {-# inline write# #-}
-write# = writeInt8Array#
+write# arr i v st = writeInt8Array# arr i (Exts.intToInt8# v) st
 
 set# :: MutableByteArray# s -> Int# -> Int# -> T# -> State# s -> State# s
 {-# inline set# #-}

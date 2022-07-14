@@ -1,3 +1,4 @@
+{-# language BangPatterns #-}
 {-# language DataKinds #-}
 {-# language MagicHash #-}
 {-# language UnboxedTuples #-}
@@ -91,11 +92,11 @@ minBound = 0
 
 lift :: T# -> T
 {-# inline lift #-}
-lift = W8#
+lift i = W8# (Exts.wordToWord8# i)
 
 unlift :: T -> T#
 {-# inline unlift #-}
-unlift (W8# i) = i
+unlift (W8# i) = Exts.word8ToWord# i
 
 gt# :: T# -> T# -> Int#
 {-# inline gt# #-}
@@ -159,15 +160,17 @@ rem# = remWord#
 
 index# :: ByteArray# -> Int# -> T#
 {-# inline index# #-}
-index# = indexWord8Array#
+index# arr i = Exts.word8ToWord# (indexWord8Array# arr i)
 
 read# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, T# #)
 {-# inline read# #-}
-read# = readWord8Array#
+read# arr i st =
+  let !(# st', v #) = readWord8Array# arr i st
+   in (# st', Exts.word8ToWord# v #)
 
 write# :: MutableByteArray# s -> Int# -> T# -> State# s -> State# s
 {-# inline write# #-}
-write# = writeWord8Array#
+write# arr i v st = writeWord8Array# arr i (Exts.wordToWord8# v) st
 
 set# :: MutableByteArray# s -> Int# -> Int# -> T# -> State# s -> State# s
 {-# inline set# #-}
