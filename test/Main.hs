@@ -95,7 +95,7 @@ tests = testGroup "basics"
               forM [0..length xs - 1] $ \i -> read marr i
             expected = take off xs ++ replicate len v ++ drop (off + len) xs
          in actual === expected
-    , testProperty "copy" $ \asdf@Copy{xs,doff,ys,soff,len} ->
+    , testProperty "copy" $ \Copy{xs,doff,ys,soff,len} ->
         let src = Prim.runByteArray $ do
               marr <- uninitialized (length ys)
               forM (zip [0..] ys) $ \(i, y) ->
@@ -109,7 +109,7 @@ tests = testGroup "basics"
               forM [0..length xs - 1] $ \i -> read dst i
             expected = take doff xs ++ take len (drop soff ys) ++ drop (doff + len) xs
          in actual === expected
-    , testProperty "copyMutable" $ \asdf@Copy{xs,doff,ys,soff,len} ->
+    , testProperty "copyMutable" $ \Copy{xs,doff,ys,soff,len} ->
         let actual = runST $ do
               src <- uninitialized (length ys)
               forM (zip [0..] ys) $ \(i, y) ->

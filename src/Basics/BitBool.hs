@@ -103,30 +103,30 @@ write# arr i v st =
 
 set# :: MutableByteArray# s -> Int# -> Int# -> T# -> State# s -> State# s
 {-# inline set# #-}
-set# _ _ 0# _ st = st
-set# arr off len v st =
-  let st' = write# arr off v st
-   in set# arr (off +# 1#) (len -# 1#) v st'
--- FIXME using this breaks shrink# ‽‽‽
--- TODO special case when off divisible by 64 and len >= 64
--- set# arr off0 len0 v st0 = case off0 `andI#` 7# of
---   0# -> byteLoop off0 len0 st0
---   len' ->
---     let st' = bitLoop off0 len' st0
---      in byteLoop (off0 +# len') (len0 -# len') st'
---   where
---   bitLoop _ 0# st = st
---   bitLoop off len st =
---     let st' = write# arr off v st
---      in bitLoop (off +# 1#) (len -# 1#) st'
---   byteLoop off len st =
---     let !offB = off `iShiftRL#` 3#
---         !lenB = len `iShiftRL#` 3#
---         !st' = Exts.setByteArray# arr offB lenB vB st
---         !off' = off +# (lenB `iShiftL#` 3#)
---         !len' = len `andI#` 7#
---      in bitLoop off' len' st'
---   vB = if isTrue# v then 0xFF# else 0#
+set# arr off0 len0 v st0 =
+    let subOff = off0 `andI#` 7#
+      -- set non-byte-aligned, initial bits
+        len = min# len0 (8# -# subOff)
+        st' = bitLoop off0 len st0
+        -- set full bytes
+        off' = off0 +# len
+        len' = len0 -# len
+        st'' = writeBytes off' len' st'
+        -- set trailing bits smaller than a byte
+        off'' = off' +# ((len' `iShiftRL#` 3#) `iShiftL#` 3#)
+        len'' = len' `andI#` 7#
+     in bitLoop off'' len'' st''
+  where
+  -- TODO could split bitLoop into writeBitsUnaligned and writeBitsAligned, which would use masking instead of a loop
+  bitLoop _ 0# st = st
+  bitLoop off len st =
+    let st' = write# arr off v st
+     in bitLoop (off +# 1#) (len -# 1#) st'
+  writeBytes off len st =
+    let !offB = off `iShiftRL#` 3#
+        !lenB = len `iShiftRL#` 3#
+     in Exts.setByteArray# arr offB lenB vB st
+  vB = if isTrue# v then 0xFF# else 0#
 
 shrink# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, MutableByteArray# s #)
 {-# inline shrink# #-}
@@ -174,3 +174,7 @@ copyMutable# dst doff src soff len st =
 
 shows :: T -> String -> String
 shows = Prelude.shows
+
+min# :: Int# -> Int# -> Int#
+{-# inline min# #-}
+min# a b = if isTrue# (a Exts.<# b) then a else b
