@@ -35,7 +35,7 @@ module Basics.BitBool
 
 import Prelude hiding (shows)
 
-import GHC.Exts ((+#),(-#),(*#),(==#),isTrue#)
+import GHC.Exts ((+#),(-#),(*#),(==#),(<#),isTrue#)
 import GHC.Exts (Int#,State#,MutableByteArray#,ByteArray#)
 import GHC.Exts (RuntimeRep(IntRep))
 import GHC.Exts (andI#,orI#,notI#,iShiftL#,iShiftRL#)
@@ -157,24 +157,53 @@ initialized# sz v0 st =
 
 copy# :: MutableByteArray# s -> Int# -> ByteArray# -> Int# -> Int# -> State# s -> State# s
 {-# inline copy# #-}
-copy# _ _ _ _ 0# st = st
-copy# dst doff src soff len st =
+copy# dst 0# src 0# len st =
+-- TODO when soff == doff, we can do like set#
+-- first align with naiveCopy, then copy by bytes, then copy the traling bits with naiveCopy
+-- in fact, this can work even when soff - doff divisible by 8
+  let !lenB = len `iShiftRL#` 3#
+      !st' = Exts.copyByteArray# src 0# dst 0# lenB st
+      !off' = lenB `iShiftL#` 3#
+      !len' = len `andI#` 7#
+   in naiveCopy# dst off' src off' len' st'
+copy# dst doff src soff len st = naiveCopy# dst doff src soff len st
+
+naiveCopy# :: MutableByteArray# s -> Int# -> ByteArray# -> Int# -> Int# -> State# s -> State# s
+-- TODO if I had an index64 :: ByteArray# -> off:Int#  -> len:Int# -> Int#
+-- that reads up to `min len 64` unaligned bits starting at off
+-- then I could write whole words at a time after aligning the doff, just as in set#
+naiveCopy# _ _ _ _ 0# st = st
+naiveCopy# dst doff src soff len st =
   let !v = index# src soff
       !st' = write# dst doff v st
-   in copy# dst (doff +# 1#) src (soff +# 1#) (len -# 1#) st'
+   in naiveCopy# dst (doff +# 1#) src (soff +# 1#) (len -# 1#) st'
 
 copyMutable# :: MutableByteArray# s -> Int# -> MutableByteArray# s -> Int# -> Int# -> State# s -> State# s
 {-# inline copyMutable# #-}
--- TODO special case when offsets are zero
-copyMutable# _ _ _ _ 0# st = st
-copyMutable# dst doff src soff len st =
+copyMutable# dst 0# src 0# len st =
+-- TODO when soff == doff, we can do like set#
+-- first align with naiveCopyMutable, then copy by bytes, then copy the traling bits with naiveCopyMutable
+-- in fact, this can work even when soff - doff divisible by 8
+  let !lenB = len `iShiftRL#` 3#
+      !st' = Exts.copyMutableByteArray# src 0# dst 0# lenB st
+      !off' = lenB `iShiftL#` 3#
+      !len' = len `andI#` 7#
+   in naiveCopyMutable# dst off' src off' len' st'
+copyMutable# dst doff src soff len st = naiveCopyMutable# dst doff src soff len st
+
+naiveCopyMutable# :: MutableByteArray# s -> Int# -> MutableByteArray# s -> Int# -> Int# -> State# s -> State# s
+-- TODO if I had an index64 :: ByteArray# -> off:Int#  -> len:Int# -> Int#
+-- that reads up to `min len 64` unaligned bits starting at off
+-- then I could write whole words at a time after aligning the doff, just as in set#
+naiveCopyMutable# _ _ _ _ 0# st = st
+naiveCopyMutable# dst doff src soff len st =
   let !(# st', v #) = read# src soff st
       !st'' = write# dst doff v st'
-   in copyMutable# dst (doff +# 1#) src (soff +# 1#) (len -# 1#) st''
+   in naiveCopyMutable# dst (doff +# 1#) src (soff +# 1#) (len -# 1#) st''
 
 shows :: T -> String -> String
 shows = Prelude.shows
 
 min# :: Int# -> Int# -> Int#
 {-# inline min# #-}
-min# a b = if isTrue# (a Exts.<# b) then a else b
+min# a b = if isTrue# (a <# b) then a else b
