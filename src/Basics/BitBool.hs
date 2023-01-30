@@ -152,7 +152,7 @@ initialized# sz v0 st =
       !paddedSz = wordSz +# if isTrue# (subWordSz ==# 0#) then 0# else 1#
       !szBytes = paddedSz *# 8#
       !(# st', marr #) = Exts.newByteArray# szBytes st
-      !v = if isTrue# v0 then notI# 0# else 0#
+      !v = if isTrue# v0 then 0xFF# else 0#
    in (# Exts.setByteArray# marr 0# szBytes v st', marr #)
 
 copy# :: MutableByteArray# s -> Int# -> ByteArray# -> Int# -> Int# -> State# s -> State# s
