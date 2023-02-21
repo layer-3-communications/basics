@@ -21,6 +21,7 @@ library
     Basics.ByteArray
     Basics.Char
     Basics.Int
+    Basics.Int1
     Basics.Int8
     Basics.Int64
     Basics.ShortText
@@ -48,6 +49,9 @@ library
 test-suite test
   type: exitcode-stdio-1.0
   main-is: Main.hs
+  other-modules:
+    BitBool
+    Int1
   build-depends:
     , base >=4.12.0.0 && <5
     , basics
