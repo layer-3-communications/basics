@@ -13,6 +13,7 @@ import Prelude hiding (read)
 import Control.Applicative (liftA2)
 import Control.Monad (forM)
 import Control.Monad.ST (runST)
+import Data.Int1 (Int1)
 import Data.Monoid (All(..))
 import Data.Primitive.ByteArray (ByteArray(..),MutableByteArray(..))
 import Data.Proxy (Proxy(Proxy))
@@ -29,6 +30,7 @@ import Unsafe.Coerce (unsafeCoerce)
 
 import qualified Control.Monad.Trans.State.Strict as State
 import qualified Data.Foldable as F
+import qualified Data.Int1 as Int1
 import qualified Data.List as L
 import qualified Data.List as List
 import qualified Data.Primitive.ByteArray as Prim
@@ -49,16 +51,16 @@ tests = testGroup "basics"
     , testCase "initialize with False" $
         let sz = 150
             actual = runST $ do
-                marr <- initialized sz (Int1 0)
+                marr <- initialized sz 0
                 forM [0..sz-1] $ \i -> read marr i
-            expected = replicate sz (Int1 0)
+            expected = replicate sz 0
          in actual @=? expected
     , testCase "initialize with True" $
         let sz = 150
             actual = runST $ do
-                marr <- initialized sz (Int1 1)
+                marr <- initialized sz 1
                 forM [0..sz-1] $ \i -> read marr i
-            expected = replicate sz (Int1 1)
+            expected = replicate sz 1
          in actual @=? expected
     , testProperty "read/write single bits" $ \xs ->
         let actual = runST $ do
@@ -124,16 +126,16 @@ tests = testGroup "basics"
 --- Lift the functions under test ---
 
 index :: ByteArray -> Int -> Int1
-index (ByteArray arr) (I# i) = Int1 $ lift (index# arr i)
+index (ByteArray arr) (I# i) = lift (index# arr i)
 
 read :: MutableByteArray s -> Int -> ST s Int1
 read (MutableByteArray marr) (I# ix) = ST (\st ->
   let (# st', v #) = read# marr ix st
-   in (# st', Int1 $ lift v #))
+   in (# st', lift v #))
 
 write :: MutableByteArray s -> Int -> Int1 -> ST s ()
 write (MutableByteArray marr) (I# i) v = ST (\st ->
-  (# write# marr i (unlift $ unInt1 v) st, () #))
+  (# write# marr i (unlift v) st, () #))
 
 uninitialized :: Int -> ST s (MutableByteArray s)
 uninitialized (I# n) = ST (\st ->
@@ -142,7 +144,7 @@ uninitialized (I# n) = ST (\st ->
 
 initialized :: Int -> Int1 -> ST s (MutableByteArray s)
 initialized (I# n) v = ST (\st ->
-  let (# st', marr #) = initialized# n (unlift $ unInt1 v) st
+  let (# st', marr #) = initialized# n (unlift v) st
    in (# st', MutableByteArray marr #))
 
 shrink :: MutableByteArray s -> Int -> ST s (MutableByteArray s)
@@ -152,7 +154,7 @@ shrink (MutableByteArray marr) (I# i) = ST (\st ->
 
 set :: MutableByteArray s -> Int -> Int -> Int1 -> ST s ()
 set (MutableByteArray marr) (I# off) (I# len) v = ST (\st ->
-   (# set# marr off len (unlift $ unInt1 v) st, () #))
+   (# set# marr off len (unlift v) st, () #))
 
 copy :: MutableByteArray s -> Int -> ByteArray -> Int -> Int -> ST s ()
 copy (MutableByteArray dst) (I# doff) (ByteArray src) (I# soff) (I# len) = ST (\st ->
@@ -162,15 +164,10 @@ copyMutable :: MutableByteArray s -> Int -> MutableByteArray s -> Int -> Int -> 
 copyMutable (MutableByteArray dst) (I# doff) (MutableByteArray src) (I# soff) (I# len) = ST (\st ->
   (# copyMutable# dst doff src soff len st, () #))
 
-
-newtype Int1 = Int1 {unInt1 :: Int}
-  deriving (Eq, Ord)
-instance Show Int1 where
-  show (Int1 n) = show n
 instance QC.Arbitrary Int1 where
   arbitrary = do
     b <- QC.arbitrary
-    pure . Int1 $ if b then 1 else 0
+    pure $ Int1.fromInt b
 
 data Shrink = Shrink { xs::[Int1], sz::Int} deriving (Show)
 instance QC.Arbitrary Shrink where

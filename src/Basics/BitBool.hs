@@ -61,11 +61,11 @@ unlift = \case
   True -> 1#
   False -> 0#
 
-eq# :: Int# -> Int# -> Int#
+eq# :: T# -> T# -> Int#
 {-# inline eq# #-}
 eq# = (==#)
 
-neq# :: Int# -> Int# -> Int#
+neq# :: T# -> T# -> Int#
 {-# inline neq# #-}
 neq# = (Exts./=#)
 

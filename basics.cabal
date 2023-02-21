@@ -34,6 +34,7 @@ library
     Basics.Word128
     Basics.Word128s
     Basics.Word256
+    Data.Int1
   build-depends:
     , base >=4.16 && <5
     , primitive >=0.7 && <0.8

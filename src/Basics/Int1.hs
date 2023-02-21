@@ -35,17 +35,18 @@ module Basics.Int1
 
 import Prelude hiding (shows)
 
+import Data.Int1 (Int1(I1),Int1#)
 import GHC.Exts ((+#),(-#),(*#),(==#),(<#),isTrue#)
 import GHC.Exts (Int#,State#,MutableByteArray#,ByteArray#)
 import GHC.Exts (RuntimeRep(IntRep))
 import GHC.Exts (andI#,orI#,notI#,iShiftL#,iShiftRL#)
-import GHC.Int (Int(I#))
 
-import qualified Prelude
+import qualified Data.Int1 as I1
 import qualified GHC.Exts as Exts
+import qualified Prelude
 
-type T = Int
-type T# = Int#
+type T = Int1
+type T# = Int1#
 type R = 'IntRep
 
 def :: T
@@ -54,19 +55,19 @@ def = 0
 
 lift :: T# -> T
 {-# inline lift #-}
-lift = I#
+lift = I1
 
 unlift :: T -> T#
 {-# inline unlift #-}
-unlift (I# n) = n
+unlift (I1 n) = n
 
-eq# :: Int# -> Int# -> Int#
+eq# :: T# -> T# -> Int#
 {-# inline eq# #-}
-eq# = (==#)
+eq# = I1.eq#
 
-neq# :: Int# -> Int# -> Int#
+neq# :: T# -> T# -> Int#
 {-# inline neq# #-}
-neq# = (Exts./=#)
+neq# = I1.neq#
 
 splitIndex_ :: Int# -> (# Int#, Int# #)
 {-# inline splitIndex_ #-}
@@ -81,7 +82,7 @@ index# arr i =
   let !(# wordIx, intraWordIx #) = splitIndex_ i
       !bitBundle = Exts.indexInt64Array# arr wordIx
       !bit = bitBundle `andI#` (1# `iShiftL#` intraWordIx)
-   in bit `iShiftRL#` intraWordIx
+   in I1.unsafeFromInt# (bit `iShiftRL#` intraWordIx)
 
 read# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, T# #)
 {-# inline read# #-}
@@ -89,7 +90,7 @@ read# arr i st =
   let !(# wordIx, intraWordIx #) = splitIndex_ i
       !(# st', bitBundle #) = Exts.readInt64Array# arr wordIx st
       !bit = bitBundle `andI#` (1# `iShiftL#` intraWordIx)
-   in (# st', bit `iShiftRL#` intraWordIx #)
+   in (# st', I1.unsafeFromInt# (bit `iShiftRL#` intraWordIx) #)
 
 write# :: MutableByteArray# s -> Int# -> T# -> State# s -> State# s
 {-# inline write# #-}
@@ -97,7 +98,7 @@ write# arr i v st =
   let !(# wordIx, intraWordIx #) = splitIndex_ i
       !(# st', bitBundle #) = Exts.readInt64Array# arr wordIx st
       !mask = notI# (1# `iShiftL#` intraWordIx)
-      !bitBundle' = (bitBundle `andI#` mask) `orI#` (v `iShiftL#` intraWordIx)
+      !bitBundle' = (bitBundle `andI#` mask) `orI#` (I1.toInt# v `iShiftL#` intraWordIx)
    in Exts.writeInt64Array# arr wordIx bitBundle' st'
 
 set# :: MutableByteArray# s -> Int# -> Int# -> T# -> State# s -> State# s
@@ -125,7 +126,7 @@ set# arr off0 len0 v st0 =
     let !offB = off `iShiftRL#` 3#
         !lenB = len `iShiftRL#` 3#
      in Exts.setByteArray# arr offB lenB vB st
-  vB = if isTrue# v then 0xFF# else 0#
+  vB = if I1.isTrue# v then 0xFF# else 0#
 
 shrink# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, MutableByteArray# s #)
 {-# inline shrink# #-}
@@ -151,7 +152,7 @@ initialized# sz v0 st =
       !paddedSz = wordSz +# if isTrue# (subWordSz ==# 0#) then 0# else 1#
       !szBytes = paddedSz *# 8#
       !(# st', marr #) = Exts.newByteArray# szBytes st
-      !v = if isTrue# v0 then notI# 0# else 0#
+      !v = I1.sextToInt# v0
    in (# Exts.setByteArray# marr 0# szBytes v st', marr #)
 
 copy# :: MutableByteArray# s -> Int# -> ByteArray# -> Int# -> Int# -> State# s -> State# s
@@ -201,6 +202,7 @@ naiveCopyMutable# dst doff src soff len st =
    in naiveCopyMutable# dst (doff +# 1#) src (soff +# 1#) (len -# 1#) st''
 
 shows :: T -> String -> String
+{-# inline shows #-}
 shows = Prelude.shows
 
 min# :: Int# -> Int# -> Int#

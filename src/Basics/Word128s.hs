@@ -94,7 +94,7 @@ shrink# m sz s0 = case uninitialized# sz s0 of
   (# s1, dst #) -> case copyMutable# dst 0# m 0# sz s1 of
     s2 -> (# s2, dst #)
 
-eq# :: ByteArray# -> ByteArray# -> Int#
+eq# :: T# -> T# -> Int#
 {-# inline eq# #-}
 eq# a b = case lenA ==# lenB of
   1# -> Exts.compareByteArrays# a 0# b 0# lenA ==# 0#
@@ -103,7 +103,7 @@ eq# a b = case lenA ==# lenB of
   !lenA = Exts.sizeofByteArray# a
   !lenB = Exts.sizeofByteArray# b
 
-neq# :: ByteArray# -> ByteArray# -> Int#
+neq# :: T# -> T# -> Int#
 {-# inline neq# #-}
 neq# a b = case lenA ==# lenB of
   1# -> Exts.compareByteArrays# a 0# b 0# lenA /=# 0#

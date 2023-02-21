@@ -96,7 +96,7 @@ shrink# m sz s0 = case uninitialized# sz s0 of
 
 -- We do not forcibly inline this because it might be useful to see this
 -- in profiling runs.
-eq# :: ArrayArray# -> ArrayArray# -> Int#
+eq# :: T# -> T# -> Int#
 eq# a b = case lenA ==# lenB of
   1# ->
     let go (-1#) = 1#
@@ -116,7 +116,7 @@ eq# a b = case lenA ==# lenB of
   !lenA = Exts.sizeofArrayArray# a
   !lenB = Exts.sizeofArrayArray# b
 
-neq# :: ArrayArray# -> ArrayArray# -> Int#
+neq# :: T# -> T# -> Int#
 {-# inline neq# #-}
 neq# a b = case eq# a b of
   1# -> 0#
