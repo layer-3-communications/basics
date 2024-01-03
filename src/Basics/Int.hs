@@ -46,6 +46,10 @@ module Basics.Int
     -- Constants
   , zero
   , def
+  , minBound
+  , maxBound
+  , infimum
+  , supremum
     -- Metadata
   , signed
   , size
@@ -53,7 +57,7 @@ module Basics.Int
   , shows
   ) where
 
-import Prelude hiding (shows)
+import Prelude hiding (shows,maxBound,minBound,read)
 
 import Data.Primitive (MutableByteArray(..))
 import GHC.Exts ((+#),(*#),(-#))
@@ -234,3 +238,19 @@ shrink# m i s0 = (# Exts.shrinkMutableByteArray# m (i *# (case size of I# sz -> 
 shows :: T -> String -> String
 {-# inline shows #-}
 shows = Prelude.shows
+
+minBound :: T
+{-# inline minBound #-}
+minBound = Prelude.minBound
+
+maxBound :: T
+{-# inline maxBound #-}
+maxBound = Prelude.maxBound
+
+infimum :: T
+{-# inline infimum #-}
+infimum = Prelude.minBound
+
+supremum :: T
+{-# inline supremum #-}
+supremum = Prelude.maxBound
