@@ -65,13 +65,13 @@ unlift = \case
   True -> wordToWord64# 1##
   False -> wordToWord64# 0##
 
-eq# :: Int# -> Int# -> Int#
+eq# :: Word64# -> Word64# -> Int#
 {-# inline eq# #-}
-eq# = (==#)
+eq# = Exts.eqWord64#
 
-neq# :: Int# -> Int# -> Int#
+neq# :: Word64# -> Word64# -> Int#
 {-# inline neq# #-}
-neq# = (Exts./=#)
+neq# = Exts.neWord64#
 
 splitIndex_ :: Int# -> (# Int#, Int# #)
 {-# inline splitIndex_ #-}
