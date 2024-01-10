@@ -37,7 +37,7 @@ import Data.Text.Short (ShortText)
 
 import qualified GHC.Exts as Exts
 
-type T = UnliftedArray ShortText
+type T = UnliftedArray_ Exts.ByteArray# ShortText
 type T# = ArrayArray#
 type R = 'BoxedRep 'Unlifted
 
