@@ -69,8 +69,8 @@ import qualified Prelude
 import qualified GHC.Exts as Exts
 
 type T = Word128
-type T# = (# Word#, Word# #)
-type R = 'TupleRep '[ 'WordRep, 'WordRep ]
+type T# = (# Word64#, Word64# #)
+type R = 'TupleRep '[ 'Word64Rep, 'Word64Rep ]
 
 def :: T
 {-# inline def #-}
@@ -94,18 +94,18 @@ size = 16
 
 lt# :: T# -> T# -> Int#
 {-# inline lt# #-}
-lt# (# a1, a2 #) (# b1, b2 #) = case ltWord# a1 b1 of
+lt# (# a1, a2 #) (# b1, b2 #) = case ltWord64# a1 b1 of
   1# -> 1#
-  _ -> case eqWord# a1 b1 of
-    1# -> ltWord# a2 b2
+  _ -> case eqWord64# a1 b1 of
+    1# -> ltWord64# a2 b2
     _ -> 0#
 
 gt# :: T# -> T# -> Int#
 {-# inline gt# #-}
-gt# (# a1, a2 #) (# b1, b2 #) = case gtWord# a1 b1 of
+gt# (# a1, a2 #) (# b1, b2 #) = case gtWord64# a1 b1 of
   1# -> 1#
-  _ -> case eqWord# a1 b1 of
-    1# -> gtWord# a2 b2
+  _ -> case eqWord64# a1 b1 of
+    1# -> gtWord64# a2 b2
     _ -> 0#
 
 gt :: T -> T -> Bool
@@ -126,10 +126,10 @@ lte = (<=)
 
 lte# :: T# -> T# -> Int#
 {-# inline lte# #-}
-lte# (# a1, a2 #) (# b1, b2 #) = case ltWord# a1 a2 of
+lte# (# a1, a2 #) (# b1, b2 #) = case ltWord64# a1 a2 of
   1# -> 1#
-  _ -> case eqWord# a1 b1 of
-    1# -> leWord# a2 b2
+  _ -> case eqWord64# a1 b1 of
+    1# -> leWord64# a2 b2
     _ -> 0#
 
 quot# :: T# -> T# -> T#
@@ -154,11 +154,11 @@ unlift (Word128 (W64# a) (W64# b)) = (# a, b #)
 
 eq# :: T# -> T# -> Int#
 {-# inline eq# #-}
-eq# (# x1, y1 #) (# x2, y2 #) = ((eqWord# x1 x2) `andI#` (eqWord# y1 y2))
+eq# (# x1, y1 #) (# x2, y2 #) = ((eqWord64# x1 x2) `andI#` (eqWord64# y1 y2))
 
 neq# :: T# -> T# -> Int#
 {-# inline neq# #-}
-neq# (# x1, y1 #) (# x2, y2 #) = ((neWord# x1 x2) `orI#` (neWord# y1 y2))
+neq# (# x1, y1 #) (# x2, y2 #) = ((neWord64# x1 x2) `orI#` (neWord64# y1 y2))
 
 eq :: T -> T -> Bool
 {-# inline eq #-}
@@ -239,38 +239,38 @@ shows = Prelude.shows
 index# :: ByteArray# -> Int# -> T#
 {-# inline index# #-}
 index# arr# i# =
-  (# Exts.indexWordArray# arr# (2# *# i#)
-  ,  Exts.indexWordArray# arr# ((2# *# i#) +# 1#) #)
+  (# Exts.indexWord64Array# arr# (2# *# i#)
+  ,  Exts.indexWord64Array# arr# ((2# *# i#) +# 1#) #)
 
 read# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, T# #)
 {-# inline read# #-}
-read# arr# i# s0 = case Exts.readWordArray# arr# (2# *# i#) s0 of
-  (# s1, i0 #) -> case Exts.readWordArray# arr# ((2# *# i#) +# 1#) s1 of
+read# arr# i# s0 = case Exts.readWord64Array# arr# (2# *# i#) s0 of
+  (# s1, i0 #) -> case Exts.readWord64Array# arr# ((2# *# i#) +# 1#) s1 of
     (# s2, i1 #) -> (# s2, (# i0, i1 #) #)
 
 write# :: MutableByteArray# s -> Int# -> T# -> State# s -> State# s
 {-# inline write# #-}
 write# arr# i# (# a, b #) s0 =
-  case Exts.writeWordArray# arr# (2# *# i#) a s0 of
-    s1 -> case Exts.writeWordArray# arr# ((2# *# i#) +# 1#) b s1 of
+  case Exts.writeWord64Array# arr# (2# *# i#) a s0 of
+    s1 -> case Exts.writeWord64Array# arr# ((2# *# i#) +# 1#) b s1 of
       s2 -> s2
 #else
 index# :: ByteArray# -> Int# -> T#
 {-# inline index# #-}
 index# arr# i# =
-  (# Exts.indexWordArray# arr# ((2# *# i#) +# 1#)
-  ,  Exts.indexWordArray# arr# (2# *# i#) #)
+  (# Exts.indexWord64Array# arr# ((2# *# i#) +# 1#)
+  ,  Exts.indexWord64Array# arr# (2# *# i#) #)
 
 read# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, T# #)
 {-# inline read# #-}
-read# arr# i# s0 = case Exts.readWordArray# arr# ((2# *# i#) +# 1#) s0 of
-  (# s1, i0 #) -> case Exts.readWordArray# arr# (2# *# i#) s1 of
+read# arr# i# s0 = case Exts.readWord64Array# arr# ((2# *# i#) +# 1#) s0 of
+  (# s1, i0 #) -> case Exts.readWord64Array# arr# (2# *# i#) s1 of
     (# s2, i1 #) -> (# s2, (# i0, i1 #) #)
 
 write# :: MutableByteArray# s -> Int# -> T# -> State# s -> State# s
 {-# inline write# #-}
 write# arr# i# (# a, b #) s0 =
-  case Exts.writeWordArray# arr# ((2# *# i#) +# 1#) a s0 of
-    s1 -> case Exts.writeWordArray# arr# (2# *# i#) b s1 of
+  case Exts.writeWord64Array# arr# ((2# *# i#) +# 1#) a s0 of
+    s1 -> case Exts.writeWord64Array# arr# (2# *# i#) b s1 of
       s2 -> s2
 #endif

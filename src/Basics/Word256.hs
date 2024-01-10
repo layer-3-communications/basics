@@ -40,8 +40,8 @@ import qualified Data.WideWord.Word256 as Word256
 import qualified GHC.Exts as Exts
 
 type T = Word256
-type T# = (# Word#, Word#, Word#, Word# #)
-type R = 'TupleRep '[ 'WordRep, 'WordRep, 'WordRep, 'WordRep ]
+type T# = (# Word64#, Word64#, Word64#, Word64# #)
+type R = 'TupleRep '[ 'Word64Rep, 'Word64Rep, 'Word64Rep, 'Word64Rep ]
 
 lift :: T# -> T
 {-# inline lift #-}
@@ -54,18 +54,18 @@ unlift (Word256 (W64# a) (W64# b) (W64# c) (W64# d)) = (# a, b, c, d #)
 eq# :: T# -> T# -> Int#
 {-# inline eq# #-}
 eq# (# x1, y1, z1, w1 #) (# x2, y2, z2, w2 #) =
-  (eqWord# x1 x2) `andI#`
-  (eqWord# y1 y2) `andI#`
-  (eqWord# z1 z2) `andI#`
-  (eqWord# w1 w2)
+  (eqWord64# x1 x2) `andI#`
+  (eqWord64# y1 y2) `andI#`
+  (eqWord64# z1 z2) `andI#`
+  (eqWord64# w1 w2)
 
 neq# :: T# -> T# -> Int#
 {-# inline neq# #-}
 neq# (# x1, y1, z1, w1 #) (# x2, y2, z2, w2 #) =
-  (neWord# x1 x2) `orI#`
-  (neWord# y1 y2) `orI#`
-  (neWord# z1 z2) `orI#`
-  (neWord# w1 w2)
+  (neWord64# x1 x2) `orI#`
+  (neWord64# y1 y2) `orI#`
+  (neWord64# z1 z2) `orI#`
+  (neWord64# w1 w2)
 
 set# :: MutableByteArray# s -> Int# -> Int# -> T# -> State# s -> State# s
 {-# inline set# #-}
@@ -106,52 +106,52 @@ shows x = (Word256.showHexWord256 x ++)
 index# :: ByteArray# -> Int# -> T#
 {-# inline index# #-}
 index# arr# i# =
-  (# Exts.indexWordArray# arr# (4# *# i#)
-  ,  Exts.indexWordArray# arr# ((4# *# i#) +# 1#)
-  ,  Exts.indexWordArray# arr# ((4# *# i#) +# 2#)
-  ,  Exts.indexWordArray# arr# ((4# *# i#) +# 3#)
+  (# Exts.indexWord64Array# arr# (4# *# i#)
+  ,  Exts.indexWord64Array# arr# ((4# *# i#) +# 1#)
+  ,  Exts.indexWord64Array# arr# ((4# *# i#) +# 2#)
+  ,  Exts.indexWord64Array# arr# ((4# *# i#) +# 3#)
   #)
 
 read# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, T# #)
 {-# inline read# #-}
-read# arr# i# s0 = case Exts.readWordArray# arr# (4# *# i#) s0 of
-  (# s1, i0 #) -> case Exts.readWordArray# arr# ((4# *# i#) +# 1#) s1 of
-    (# s2, i1 #) -> case Exts.readWordArray# arr# ((4# *# i#) +# 2#) s2 of
-      (# s3, i2 #) -> case Exts.readWordArray# arr# ((4# *# i#) +# 3#) s3 of
+read# arr# i# s0 = case Exts.readWord64Array# arr# (4# *# i#) s0 of
+  (# s1, i0 #) -> case Exts.readWord64Array# arr# ((4# *# i#) +# 1#) s1 of
+    (# s2, i1 #) -> case Exts.readWord64Array# arr# ((4# *# i#) +# 2#) s2 of
+      (# s3, i2 #) -> case Exts.readWord64Array# arr# ((4# *# i#) +# 3#) s3 of
         (# s4, i3 #) -> (# s4, (# i0, i1, i2, i3 #) #)
 
 write# :: MutableByteArray# s -> Int# -> T# -> State# s -> State# s
 {-# inline write# #-}
 write# arr# i# (# a, b, c, d #) s0 =
-  case Exts.writeWordArray# arr# (4# *# i#) a s0 of
-    s1 -> case Exts.writeWordArray# arr# ((4# *# i#) +# 1#) b s1 of
-      s2 -> case Exts.writeWordArray# arr# ((4# *# i#) +# 2#) c s2 of
-        s3 -> case Exts.writeWordArray# arr# ((4# *# i#) +# 3#) d s3 of
+  case Exts.writeWord64Array# arr# (4# *# i#) a s0 of
+    s1 -> case Exts.writeWord64Array# arr# ((4# *# i#) +# 1#) b s1 of
+      s2 -> case Exts.writeWord64Array# arr# ((4# *# i#) +# 2#) c s2 of
+        s3 -> case Exts.writeWord64Array# arr# ((4# *# i#) +# 3#) d s3 of
           s4 -> s4
 #else
 index# :: ByteArray# -> Int# -> T#
 {-# inline index# #-}
 index# arr# i# =
-  (# Exts.indexWordArray# arr# ((4# *# i#) +# 3#)
-  ,  Exts.indexWordArray# arr# ((4# *# i#) +# 2#)
-  ,  Exts.indexWordArray# arr# ((4# *# i#) +# 1#)
-  ,  Exts.indexWordArray# arr# (4# *# i#)
+  (# Exts.indexWord64Array# arr# ((4# *# i#) +# 3#)
+  ,  Exts.indexWord64Array# arr# ((4# *# i#) +# 2#)
+  ,  Exts.indexWord64Array# arr# ((4# *# i#) +# 1#)
+  ,  Exts.indexWord64Array# arr# (4# *# i#)
   #)
 
 read# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, T# #)
 {-# inline read# #-}
-read# arr# i# s0 = case Exts.readWordArray# arr# ((4# *# i#) +# 3#) s0 of
-  (# s1, i0 #) -> case Exts.readWordArray# arr# ((4# *# i#) +# 2#) s1 of
-    (# s2, i1 #) -> case Exts.readWordArray# arr# ((4# *# i#) +# 1#) s2 of
-      (# s3, i2 #) -> case Exts.readWordArray# arr# (4# *# i#) s3 of
+read# arr# i# s0 = case Exts.readWord64Array# arr# ((4# *# i#) +# 3#) s0 of
+  (# s1, i0 #) -> case Exts.readWord64Array# arr# ((4# *# i#) +# 2#) s1 of
+    (# s2, i1 #) -> case Exts.readWord64Array# arr# ((4# *# i#) +# 1#) s2 of
+      (# s3, i2 #) -> case Exts.readWord64Array# arr# (4# *# i#) s3 of
         (# s4, i3 #) -> (# s4, (# i0, i1, i2, i3 #) #)
 
 write# :: MutableByteArray# s -> Int# -> T# -> State# s -> State# s
 {-# inline write# #-}
 write# arr# i# (# a, b, c, d #) s0 =
-  case Exts.writeWordArray# arr# ((4# *# i#) +# 3#) a s0 of
-    s1 -> case Exts.writeWordArray# arr# ((4# *# i#) +# 2#) b s1 of
-      s2 -> case Exts.writeWordArray# arr# ((4# *# i#) +# 1#) c s2 of
-        s3 -> case Exts.writeWordArray# arr# (4# *# i#) d s3 of
+  case Exts.writeWord64Array# arr# ((4# *# i#) +# 3#) a s0 of
+    s1 -> case Exts.writeWord64Array# arr# ((4# *# i#) +# 2#) b s1 of
+      s2 -> case Exts.writeWord64Array# arr# ((4# *# i#) +# 1#) c s2 of
+        s3 -> case Exts.writeWord64Array# arr# (4# *# i#) d s3 of
           s4 -> s4
 #endif

@@ -35,17 +35,19 @@ module Basics.BitBool
 
 import Prelude hiding (shows)
 
-import GHC.Exts ((+#),(-#),(*#),(==#),(<#),isTrue#)
-import GHC.Exts (Int#,State#,MutableByteArray#,ByteArray#)
-import GHC.Exts (RuntimeRep(IntRep))
+import GHC.Exts ((+#),(-#),(*#),(==#),(<#),isTrue#,int64ToInt#)
+import GHC.Exts (Int#,Word64#,State#,MutableByteArray#,ByteArray#)
+import GHC.Exts (RuntimeRep(Word64Rep))
 import GHC.Exts (andI#,orI#,notI#,iShiftL#,iShiftRL#)
+import GHC.Exts (eqWord64#,wordToWord64#,uncheckedShiftL64#,or64#,and64#,not64#)
+import GHC.Exts (uncheckedShiftRL64#,word64ToWord#)
 
 import qualified Prelude
 import qualified GHC.Exts as Exts
 
 type T = Bool
-type T# = Int#
-type R = 'IntRep
+type T# = Word64#
+type R = 'Word64Rep
 
 def :: T
 {-# inline def #-}
@@ -53,13 +55,15 @@ def = False
 
 lift :: T# -> T
 {-# inline lift #-}
-lift x = Exts.tagToEnum# x :: Bool
+lift x = case word64ToWord# x of
+  0## -> False
+  _ -> True
 
 unlift :: T -> T#
 {-# inline unlift #-}
 unlift = \case
-  True -> 1#
-  False -> 0#
+  True -> wordToWord64# 1##
+  False -> wordToWord64# 0##
 
 eq# :: Int# -> Int# -> Int#
 {-# inline eq# #-}
@@ -80,26 +84,26 @@ index# :: ByteArray# -> Int# -> T#
 {-# inline index# #-}
 index# arr i =
   let !(# wordIx, intraWordIx #) = splitIndex_ i
-      !bitBundle = Exts.indexInt64Array# arr wordIx
-      !bit = bitBundle `andI#` (1# `iShiftL#` intraWordIx)
-   in bit `iShiftRL#` intraWordIx
+      !bitBundle = Exts.indexWord64Array# arr wordIx
+      !bit = bitBundle `and64#` ((wordToWord64# 1##) `uncheckedShiftL64#` intraWordIx)
+   in bit `uncheckedShiftRL64#` intraWordIx
 
 read# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, T# #)
 {-# inline read# #-}
 read# arr i st =
   let !(# wordIx, intraWordIx #) = splitIndex_ i
-      !(# st', bitBundle #) = Exts.readInt64Array# arr wordIx st
-      !bit = bitBundle `andI#` (1# `iShiftL#` intraWordIx)
-   in (# st', bit `iShiftRL#` intraWordIx #)
+      !(# st', bitBundle #) = Exts.readWord64Array# arr wordIx st
+      !bit = bitBundle `and64#` ((wordToWord64# 1##) `uncheckedShiftL64#` intraWordIx)
+   in (# st', bit `uncheckedShiftRL64#` intraWordIx #)
 
 write# :: MutableByteArray# s -> Int# -> T# -> State# s -> State# s
 {-# inline write# #-}
 write# arr i v st =
   let !(# wordIx, intraWordIx #) = splitIndex_ i
-      !(# st', bitBundle #) = Exts.readInt64Array# arr wordIx st
-      !mask = notI# (1# `iShiftL#` intraWordIx)
-      !bitBundle' = (bitBundle `andI#` mask) `orI#` (v `iShiftL#` intraWordIx)
-   in Exts.writeInt64Array# arr wordIx bitBundle' st'
+      !(# st', bitBundle #) = Exts.readWord64Array# arr wordIx st
+      !mask = not64# ((wordToWord64# 1##) `uncheckedShiftL64#` intraWordIx)
+      !bitBundle' = (bitBundle `and64#` mask) `or64#` (v `uncheckedShiftL64#` intraWordIx)
+   in Exts.writeWord64Array# arr wordIx bitBundle' st'
 
 set# :: MutableByteArray# s -> Int# -> Int# -> T# -> State# s -> State# s
 {-# inline set# #-}
@@ -126,7 +130,9 @@ set# arr off0 len0 v st0 =
     let !offB = off `iShiftRL#` 3#
         !lenB = len `iShiftRL#` 3#
      in Exts.setByteArray# arr offB lenB vB st
-  vB = if isTrue# v then 0xFF# else 0#
+  vB = case eqWord64# v (wordToWord64# 0##) of
+    1# -> 0#
+    _ -> 0xFF#
 
 shrink# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, MutableByteArray# s #)
 {-# inline shrink# #-}
@@ -152,7 +158,9 @@ initialized# sz v0 st =
       !paddedSz = wordSz +# if isTrue# (subWordSz ==# 0#) then 0# else 1#
       !szBytes = paddedSz *# 8#
       !(# st', marr #) = Exts.newByteArray# szBytes st
-      !v = if isTrue# v0 then 0xFF# else 0#
+      !v = case eqWord64# v0 (wordToWord64# 0##) of
+        1# -> 0#
+        _ -> 0xFF#
    in (# Exts.setByteArray# marr 0# szBytes v st', marr #)
 
 copy# :: MutableByteArray# s -> Int# -> ByteArray# -> Int# -> Int# -> State# s -> State# s

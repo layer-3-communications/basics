@@ -30,7 +30,9 @@ module Basics.ByteArrays
 import Prelude hiding (shows)
 
 import GHC.Exts hiding (setByteArray#)
-import Data.Primitive.Unlifted.Array (UnliftedArray(..))
+import Data.Primitive.Unlifted.Array (UnliftedArray)
+import Data.Primitive.Unlifted.Array.ST (UnliftedArray_(..))
+import Data.Primitive.Unlifted.Array.Primops (UnliftedArray#(..))
 import Data.Primitive (ByteArray)
 
 import qualified GHC.Exts as Exts
@@ -41,11 +43,11 @@ type R = 'BoxedRep 'Unlifted
 
 lift :: T# -> T
 {-# inline lift #-}
-lift = UnliftedArray
+lift (Exts.ArrayArray# x) = UnliftedArray (UnliftedArray# x)
 
 unlift :: T -> T#
 {-# inline unlift #-}
-unlift (UnliftedArray x) = x
+unlift (UnliftedArray (UnliftedArray# x)) = Exts.ArrayArray# x
 
 index# :: ArrayArray# -> Int# -> T#
 {-# inline index# #-}

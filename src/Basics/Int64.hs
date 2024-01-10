@@ -71,8 +71,8 @@ import qualified Prelude
 import qualified GHC.Exts as Exts
 
 type T = Int64
-type T# = Int#
-type R = 'IntRep
+type T# = Int64#
+type R = 'Int64Rep
 
 def :: T
 {-# inline def #-}
@@ -84,19 +84,19 @@ zero = 0
 
 minBound :: T
 {-# inline minBound #-}
-minBound = I64# (-9223372036854775808#)
+minBound = I64# (intToInt64# (-9223372036854775808#))
 
 maxBound :: T
 {-# inline maxBound #-}
-maxBound = I64# (9223372036854775807#)
+maxBound = I64# (intToInt64# (9223372036854775807#))
 
 infimum :: T
 {-# inline infimum #-}
-infimum = I64# (-9223372036854775808#)
+infimum = I64# (intToInt64# (-9223372036854775808#))
 
 supremum :: T
 {-# inline supremum #-}
-supremum = I64# (9223372036854775807#)
+supremum = I64# (intToInt64# (9223372036854775807#))
 
 signed :: Bool
 {-# inline signed #-}
@@ -112,55 +112,55 @@ unlift (I64# i) = i
 
 plus :: T -> T -> T
 {-# inline plus #-}
-plus (I64# x) (I64# y) = I64# (x +# y)
+plus (I64# x) (I64# y) = I64# (plusInt64# x y)
 
 minus :: T -> T -> T
 {-# inline minus #-}
-minus (I64# x) (I64# y) = I64# (x -# y)
+minus (I64# x) (I64# y) = I64# (subInt64# x y)
 
 times# :: T# -> T# -> T#
 {-# inline times# #-}
-times# = (*#)
+times# = timesInt64#
 
 quot# :: T# -> T# -> T#
 {-# inline quot# #-}
-quot# = quotInt#
+quot# = quotInt64#
 
 rem# :: T# -> T# -> T#
 {-# inline rem# #-}
-rem# = remInt#
+rem# = remInt64#
 
 plus# :: T# -> T# -> T#
 {-# inline plus# #-}
-plus# = (+#)
+plus# = plusInt64#
 
 minus# :: T# -> T# -> T#
 {-# inline minus# #-}
-minus# = (-#)
+minus# = subInt64#
 
 gt# :: T# -> T# -> Int#
 {-# inline gt# #-}
-gt# = (>#)
+gt# = gtInt64#
 
 lt# :: T# -> T# -> Int#
 {-# inline lt# #-}
-lt# = (<#)
+lt# = ltInt64#
 
 gte# :: T# -> T# -> Int#
 {-# inline gte# #-}
-gte# = (>=#)
+gte# = geInt64#
 
 lte# :: T# -> T# -> Int#
 {-# inline lte# #-}
-lte# = (<=#)
+lte# = leInt64#
 
 eq# :: T# -> T# -> Int#
 {-# inline eq# #-}
-eq# = (==#)
+eq# = eqInt64#
 
 neq# :: T# -> T# -> Int#
 {-# inline neq# #-}
-neq# = (/=#)
+neq# = neInt64#
 
 gt :: T -> T -> Bool
 {-# inline gt #-}
@@ -188,15 +188,15 @@ neq = (/=)
 
 index# :: ByteArray# -> Int# -> T#
 {-# inline index# #-}
-index# = indexIntArray#
+index# = indexInt64Array#
 
 read# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, T# #)
 {-# inline read# #-}
-read# = readIntArray#
+read# = readInt64Array#
 
 write# :: MutableByteArray# s -> Int# -> T# -> State# s -> State# s
 {-# inline write# #-}
-write# = writeIntArray#
+write# = writeInt64Array#
 
 set# :: MutableByteArray# s -> Int# -> Int# -> T# -> State# s -> State# s
 {-# inline set# #-}

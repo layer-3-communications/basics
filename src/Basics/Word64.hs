@@ -70,8 +70,8 @@ import qualified Prelude
 import qualified GHC.Exts as Exts
 
 type T = Word64
-type T# = Word#
-type R = 'WordRep
+type T# = Word64#
+type R = 'Word64Rep
 
 def :: T
 {-# inline def #-}
@@ -107,55 +107,55 @@ unlift (W64# i) = i
 
 plus :: T -> T -> T
 {-# inline plus #-}
-plus (W64# x) (W64# y) = W64# (plusWord# x y)
+plus (W64# x) (W64# y) = W64# (plusWord64# x y)
 
 minus :: T -> T -> T
 {-# inline minus #-}
-minus (W64# x) (W64# y) = W64# (minusWord# x y)
+minus (W64# x) (W64# y) = W64# (subWord64# x y)
 
 times# :: T# -> T# -> T#
 {-# inline times# #-}
-times# = timesWord#
+times# = timesWord64#
 
 quot# :: T# -> T# -> T#
 {-# inline quot# #-}
-quot# = quotWord#
+quot# = quotWord64#
 
 rem# :: T# -> T# -> T#
 {-# inline rem# #-}
-rem# = remWord#
+rem# = remWord64#
 
 plus# :: T# -> T# -> T#
 {-# inline plus# #-}
-plus# = plusWord#
+plus# = plusWord64#
 
 minus# :: T# -> T# -> T#
 {-# inline minus# #-}
-minus# = minusWord#
+minus# = subWord64#
 
 gt# :: T# -> T# -> Int#
 {-# inline gt# #-}
-gt# = gtWord#
+gt# = gtWord64#
 
 lt# :: T# -> T# -> Int#
 {-# inline lt# #-}
-lt# = ltWord#
+lt# = ltWord64#
 
 gte# :: T# -> T# -> Int#
 {-# inline gte# #-}
-gte# = geWord#
+gte# = geWord64#
 
 lte# :: T# -> T# -> Int#
 {-# inline lte# #-}
-lte# = leWord#
+lte# = leWord64#
 
 eq# :: T# -> T# -> Int#
 {-# inline eq# #-}
-eq# = eqWord#
+eq# = eqWord64#
 
 neq# :: T# -> T# -> Int#
 {-# inline neq# #-}
-neq# = neWord#
+neq# = neWord64#
 
 gt :: T -> T -> Bool
 {-# inline gt #-}
@@ -183,15 +183,15 @@ neq = (/=)
 
 index# :: ByteArray# -> Int# -> T#
 {-# inline index# #-}
-index# = indexWordArray#
+index# = indexWord64Array#
 
 read# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, T# #)
 {-# inline read# #-}
-read# = readWordArray#
+read# = readWord64Array#
 
 write# :: MutableByteArray# s -> Int# -> T# -> State# s -> State# s
 {-# inline write# #-}
-write# = writeWordArray#
+write# = writeWord64Array#
 
 set# :: MutableByteArray# s -> Int# -> Int# -> T# -> State# s -> State# s
 {-# inline set# #-}

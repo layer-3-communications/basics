@@ -1,6 +1,6 @@
 cabal-version: 2.2
 name: basics
-version: 0.2.0.0
+version: 0.3.0.0
 synopsis: Modules for primitive types
 -- description:
 homepage: https://github.com/andrewthad/basics
@@ -35,12 +35,12 @@ library
     Basics.Word128s
     Basics.Word256
   build-depends:
-    , base >=4.16 && <4.17
+    , base >=4.17 && <5
     , primitive >=0.7 && <0.10
-    , primitive-unlifted >=0.1.2 && <2.2
+    , primitive-unlifted >=2.1
     , text-short >=0.1.3 && <0.2
-    , bytestring >=0.10.8 && <0.12
-    , bifunctors >=5.5.4 && <5.6
+    , bytestring >=0.10.8
+    , bifunctors >=5.5.4
     , wide-word >=0.1.1
   hs-source-dirs: src
   ghc-options: -Wall -O2
