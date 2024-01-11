@@ -77,9 +77,8 @@ initialized# ::
      Int# -> T# -> State# s
   -> (# State# s, MutableArrayArray# s #)
 {-# inline initialized# #-}
-initialized# n e s0 = case uninitialized# n s0 of
-  (# s1, a #) -> case set# a 0# n e s1 of
-    s2 -> (# s2, a #)
+initialized# n e s0 = case Exts.newArray# n e s0 of
+  (# s1, a #) -> (# s1, Exts.MutableArrayArray# a #)
 
 copy# :: MutableArrayArray# s -> Int# -> ArrayArray# -> Int# -> Int# -> State# s -> State# s
 {-# inline copy# #-}
