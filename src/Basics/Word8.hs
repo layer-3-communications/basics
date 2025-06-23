@@ -63,8 +63,8 @@ import qualified Prelude
 import qualified GHC.Exts as Exts
 
 type T = Word8
-type T# = Word#
-type R = 'WordRep
+type T# = Word8#
+type R = 'Word8Rep
 
 def :: T
 {-# inline def #-}
@@ -92,89 +92,87 @@ minBound = 0
 
 lift :: T# -> T
 {-# inline lift #-}
-lift i = W8# (Exts.wordToWord8# i)
+lift i = W8# i
 
 unlift :: T -> T#
 {-# inline unlift #-}
-unlift (W8# i) = Exts.word8ToWord# i
+unlift (W8# i) = i
 
 gt# :: T# -> T# -> Int#
 {-# inline gt# #-}
-gt# = gtWord#
+gt# = gtWord8#
 
 lt# :: T# -> T# -> Int#
 {-# inline lt# #-}
-lt# = ltWord#
+lt# = ltWord8#
 
 gte# :: T# -> T# -> Int#
 {-# inline gte# #-}
-gte# = geWord#
+gte# = geWord8#
 
 lte# :: T# -> T# -> Int#
 {-# inline lte# #-}
-lte# = leWord#
+lte# = leWord8#
 
 eq# :: T# -> T# -> Int#
 {-# inline eq# #-}
-eq# = eqWord#
+eq# = eqWord8#
 
 neq# :: T# -> T# -> Int#
 {-# inline neq# #-}
-neq# = neWord#
+neq# = neWord8#
 
 gt :: T -> T -> Bool
 {-# inline gt #-}
-gt = (>)
+gt (W8# a) (W8# b) = Exts.isTrue# (gtWord8# a b)
 
 lt :: T -> T -> Bool
 {-# inline lt #-}
-lt = (<)
+lt (W8# a) (W8# b) = Exts.isTrue# (ltWord8# a b)
 
 gte :: T -> T -> Bool
 {-# inline gte #-}
-gte = (>=)
+gte (W8# a) (W8# b) = Exts.isTrue# (geWord8# a b)
 
 lte :: T -> T -> Bool
 {-# inline lte #-}
-lte = (<=)
+lte (W8# a) (W8# b) = Exts.isTrue# (leWord8# a b)
 
 eq :: T -> T -> Bool
 {-# inline eq #-}
-eq = (==)
+eq (W8# a) (W8# b) = Exts.isTrue# (eqWord8# a b)
 
 neq :: T -> T -> Bool
 {-# inline neq #-}
-neq = (/=)
+neq (W8# a) (W8# b) = Exts.isTrue# (neWord8# a b)
 
 minus# :: T# -> T# -> T#
 {-# inline minus# #-}
-minus# x y = narrow8Word# (minusWord# x y)
+minus# x y = subWord8# x y
 
 quot# :: T# -> T# -> T#
 {-# inline quot# #-}
-quot# = quotWord#
+quot# = quotWord8#
 
 rem# :: T# -> T# -> T#
 {-# inline rem# #-}
-rem# = remWord#
+rem# = remWord8#
 
 index# :: ByteArray# -> Int# -> T#
 {-# inline index# #-}
-index# arr i = Exts.word8ToWord# (indexWord8Array# arr i)
+index# arr i = indexWord8Array# arr i
 
 read# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, T# #)
 {-# inline read# #-}
-read# arr i st =
-  let !(# st', v #) = readWord8Array# arr i st
-   in (# st', Exts.word8ToWord# v #)
+read# arr i st = readWord8Array# arr i st
 
 write# :: MutableByteArray# s -> Int# -> T# -> State# s -> State# s
 {-# inline write# #-}
-write# arr i v st = writeWord8Array# arr i (Exts.wordToWord8# v) st
+write# arr i v st = writeWord8Array# arr i v st
 
 set# :: MutableByteArray# s -> Int# -> Int# -> T# -> State# s -> State# s
 {-# inline set# #-}
-set# marr off len x s = Exts.setByteArray# marr off len (word2Int# x) s
+set# marr off len x s = Exts.setByteArray# marr off len (word2Int# (word8ToWord# x)) s
 
 shrink# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, MutableByteArray# s #)
 {-# inline shrink# #-}
