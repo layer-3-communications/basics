@@ -67,8 +67,8 @@ import qualified Prelude
 import qualified GHC.Exts as Exts
 
 type T = Word32
-type T# = Word#
-type R = 'WordRep
+type T# = Word32#
+type R = 'Word32Rep
 
 def :: T
 {-# inline def #-}
@@ -96,85 +96,85 @@ size = 4
 
 lift :: T# -> T
 {-# inline lift #-}
-lift i = W32# (Exts.wordToWord32# i)
+lift i = W32# i
 
 unlift :: T -> T#
 {-# inline unlift #-}
-unlift (W32# i) = Exts.word32ToWord# i
+unlift (W32# i) = i
 
 gt# :: T# -> T# -> Int#
 {-# inline gt# #-}
-gt# = gtWord#
+gt# = gtWord32#
 
 lt# :: T# -> T# -> Int#
 {-# inline lt# #-}
-lt# = ltWord#
+lt# = ltWord32#
 
 gte# :: T# -> T# -> Int#
 {-# inline gte# #-}
-gte# = geWord#
+gte# = geWord32#
 
 lte# :: T# -> T# -> Int#
 {-# inline lte# #-}
-lte# = leWord#
+lte# = leWord32#
 
 eq# :: T# -> T# -> Int#
 {-# inline eq# #-}
-eq# = eqWord#
+eq# = eqWord32#
 
 neq# :: T# -> T# -> Int#
 {-# inline neq# #-}
-neq# = neWord#
+neq# = neWord32#
 
 gt :: T -> T -> Bool
 {-# inline gt #-}
-gt = (>)
+gt (W32# a) (W32# b) = Exts.isTrue# (gtWord32# a b)
 
 lt :: T -> T -> Bool
 {-# inline lt #-}
-lt = (<)
+lt (W32# a) (W32# b) = Exts.isTrue# (ltWord32# a b)
 
 gte :: T -> T -> Bool
 {-# inline gte #-}
-gte = (>=)
+gte (W32# a) (W32# b) = Exts.isTrue# (geWord32# a b)
 
 lte :: T -> T -> Bool
 {-# inline lte #-}
-lte = (<=)
+lte (W32# a) (W32# b) = Exts.isTrue# (leWord32# a b)
 
 eq :: T -> T -> Bool
 {-# inline eq #-}
-eq = (==)
+eq (W32# a) (W32# b) = Exts.isTrue# (eqWord32# a b)
 
 neq :: T -> T -> Bool
 {-# inline neq #-}
-neq = (/=)
+neq (W32# a) (W32# b) = Exts.isTrue# (neWord32# a b)
 
 minus# :: T# -> T# -> T#
 {-# inline minus# #-}
-minus# x y = narrow32Word# (minusWord# x y)
+minus# x y = subWord32# x y
 
 quot# :: T# -> T# -> T#
 {-# inline quot# #-}
-quot# = quotWord#
+quot# = quotWord32#
 
 rem# :: T# -> T# -> T#
 {-# inline rem# #-}
-rem# = remWord#
+rem# = remWord32#
 
 index# :: ByteArray# -> Int# -> T#
 {-# inline index# #-}
-index# arr i = Exts.word32ToWord# (indexWord32Array# arr i)
+index# arr i = indexWord32Array# arr i
 
 read# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, T# #)
 {-# inline read# #-}
 read# arr i st =
   let !(# st', v #) = readWord32Array# arr i st
-   in (# st', Exts.word32ToWord# v #)
+   in (# st', v #)
 
 write# :: MutableByteArray# s -> Int# -> T# -> State# s -> State# s
 {-# inline write# #-}
-write# arr i v st = writeWord32Array# arr i (Exts.wordToWord32# v) st
+write# arr i v st = writeWord32Array# arr i v st
 
 index :: ByteArray -> Int -> T
 {-# inline index #-}
