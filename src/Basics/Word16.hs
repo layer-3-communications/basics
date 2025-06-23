@@ -71,8 +71,8 @@ import qualified Prelude
 import qualified GHC.Exts as Exts
 
 type T = Word16
-type T# = Word#
-type R = 'WordRep
+type T# = Word16#
+type R = 'Word16Rep
 
 def :: T
 {-# inline def #-}
@@ -100,11 +100,11 @@ minBound = 0
 
 lift :: T# -> T
 {-# inline lift #-}
-lift i = W16# (Exts.wordToWord16# i)
+lift i = W16# i
 
 unlift :: T -> T#
 {-# inline unlift #-}
-unlift (W16# i) = Exts.word16ToWord# i
+unlift (W16# i) = i
 
 plus :: T -> T -> T
 {-# inline plus #-}
@@ -116,85 +116,85 @@ minus (W16# x) (W16# y) = W16# (subWord16# x y)
 
 times# :: T# -> T# -> T#
 {-# inline times# #-}
-times# = timesWord#
+times# = timesWord16#
 
 quot# :: T# -> T# -> T#
 {-# inline quot# #-}
-quot# = quotWord#
+quot# = quotWord16#
 
 rem# :: T# -> T# -> T#
 {-# inline rem# #-}
-rem# = remWord#
+rem# = remWord16#
 
 plus# :: T# -> T# -> T#
 {-# inline plus# #-}
-plus# = plusWord#
+plus# = plusWord16#
 
 minus# :: T# -> T# -> T#
 {-# inline minus# #-}
-minus# x y = narrow16Word# (minusWord# x y)
+minus# x y = subWord16# x y
 
 gt# :: T# -> T# -> Int#
 {-# inline gt# #-}
-gt# = gtWord#
+gt# = gtWord16#
 
 lt# :: T# -> T# -> Int#
 {-# inline lt# #-}
-lt# = ltWord#
+lt# = ltWord16#
 
 gte# :: T# -> T# -> Int#
 {-# inline gte# #-}
-gte# = geWord#
+gte# = geWord16#
 
 lte# :: T# -> T# -> Int#
 {-# inline lte# #-}
-lte# = leWord#
+lte# = leWord16#
 
 eq# :: T# -> T# -> Int#
 {-# inline eq# #-}
-eq# = eqWord#
+eq# = eqWord16#
 
 neq# :: T# -> T# -> Int#
 {-# inline neq# #-}
-neq# = neWord#
+neq# = neWord16#
 
 gt :: T -> T -> Bool
 {-# inline gt #-}
-gt = (>)
+gt (W16# a) (W16# b) = Exts.isTrue# (gtWord16# a b)
 
 lt :: T -> T -> Bool
 {-# inline lt #-}
-lt = (<)
+lt (W16# a) (W16# b) = Exts.isTrue# (ltWord16# a b)
 
 gte :: T -> T -> Bool
 {-# inline gte #-}
-gte = (>=)
+gte (W16# a) (W16# b) = Exts.isTrue# (geWord16# a b)
 
 lte :: T -> T -> Bool
 {-# inline lte #-}
-lte = (<=)
+lte (W16# a) (W16# b) = Exts.isTrue# (leWord16# a b)
 
 eq :: T -> T -> Bool
 {-# inline eq #-}
-eq = (==)
+eq (W16# a) (W16# b) = Exts.isTrue# (eqWord16# a b)
 
 neq :: T -> T -> Bool
 {-# inline neq #-}
-neq = (/=)
+neq (W16# a) (W16# b) = Exts.isTrue# (neWord16# a b)
 
 index# :: ByteArray# -> Int# -> T#
 {-# inline index# #-}
-index# arr i = Exts.word16ToWord# (indexWord16Array# arr i)
+index# arr i = indexWord16Array# arr i
 
 read# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, T# #)
 {-# inline read# #-}
 read# arr i st =
   let !(# st', v #) = readWord16Array# arr i st
-   in (# st', Exts.word16ToWord# v #)
+   in (# st', v #)
 
 write# :: MutableByteArray# s -> Int# -> T# -> State# s -> State# s
 {-# inline write# #-}
-write# arr i v st = writeWord16Array# arr i (Exts.wordToWord16# v) st
+write# arr i v st = writeWord16Array# arr i v st
 
 set# :: MutableByteArray# s -> Int# -> Int# -> T# -> State# s -> State# s
 {-# inline set# #-}
