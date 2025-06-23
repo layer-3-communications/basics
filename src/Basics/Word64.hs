@@ -159,27 +159,27 @@ neq# = neWord64#
 
 gt :: T -> T -> Bool
 {-# inline gt #-}
-gt = (>)
+gt (W64# a) (W64# b) = Exts.isTrue# (gtWord64# a b)
 
 lt :: T -> T -> Bool
 {-# inline lt #-}
-lt = (<)
+lt (W64# a) (W64# b) = Exts.isTrue# (ltWord64# a b)
 
 gte :: T -> T -> Bool
 {-# inline gte #-}
-gte = (>=)
+gte (W64# a) (W64# b) = Exts.isTrue# (geWord64# a b)
 
 lte :: T -> T -> Bool
 {-# inline lte #-}
-lte = (<=)
+lte (W64# a) (W64# b) = Exts.isTrue# (leWord64# a b)
 
 eq :: T -> T -> Bool
 {-# inline eq #-}
-eq = (==)
+eq (W64# a) (W64# b) = Exts.isTrue# (eqWord64# a b)
 
 neq :: T -> T -> Bool
 {-# inline neq #-}
-neq = (/=)
+neq (W64# a) (W64# b) = Exts.isTrue# (neWord64# a b)
 
 index# :: ByteArray# -> Int# -> T#
 {-# inline index# #-}
